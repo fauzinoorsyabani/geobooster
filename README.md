@@ -21,6 +21,8 @@ php -S 127.0.0.1:8080 -t public
 
 Buka `http://127.0.0.1:8080`.
 
+Admin console M1 tersedia di `http://127.0.0.1:8080/admin/` setelah database terhubung dan migration/seed dijalankan. Tanpa database, route admin sengaja mengembalikan halaman `503` yang aman dan tidak membocorkan error koneksi.
+
 Untuk IDE Antigravity, buka repository ini lalu jalankan `./run-local.sh` dari terminal. Panduan lengkap tersedia di [docs/antigravity.md](docs/antigravity.md).
 
 ## Struktur penting

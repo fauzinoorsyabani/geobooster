@@ -91,3 +91,40 @@ final class AuditLogger
         ]);
     }
 }
+
+final class Auth
+{
+    public function __construct(private readonly PDO $db) {}
+
+    public function attempt(string $email, string $password): bool
+    {
+        Csrf::start();
+        $statement = $this->db->prepare('SELECT id, password_hash FROM users WHERE email = :email AND status = \'active\' LIMIT 1');
+        $statement->execute(['email' => strtolower(trim($email))]);
+        $user = $statement->fetch();
+        if (!is_array($user) || !password_verify($password, $user['password_hash'])) {
+            return false;
+        }
+        session_regenerate_id(true);
+        $_SESSION['user_id'] = (int) $user['id'];
+        $this->db->prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = :id')->execute(['id' => $user['id']]);
+        return true;
+    }
+
+    public function userId(): ?int
+    {
+        Csrf::start();
+        return isset($_SESSION['user_id']) ? (int) $_SESSION['user_id'] : null;
+    }
+
+    public function logout(): void
+    {
+        Csrf::start();
+        $_SESSION = [];
+        if (ini_get('session.use_cookies')) {
+            $params = session_get_cookie_params();
+            setcookie(session_name(), '', time() - 42000, $params['path'], $params['domain'] ?? '', (bool) $params['secure'], (bool) $params['httponly']);
+        }
+        session_destroy();
+    }
+}
