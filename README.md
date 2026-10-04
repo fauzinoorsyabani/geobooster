@@ -6,7 +6,7 @@ Geo Booster adalah fondasi Software as a Service (SaaS) untuk katalog dan penjua
 
 Repositori ini sebelumnya berisi aplikasi React/TypeScript dari proyek lain. Fondasi Geo Booster ditambahkan sebagai aplikasi PHP mandiri di `php-app/` agar migrasi dapat dilakukan bertahap tanpa menghapus aset lama.
 
-Versi yang tersedia saat ini adalah **catalogue-first MVP**: landing page, katalog produk, filter kategori, trust signals, dan alur permintaan pesanan yang belum terhubung ke pembayaran atau provisioning otomatis.
+Versi yang tersedia saat ini adalah **catalogue-first MVP**: landing page, katalog produk, filter kategori, trust signals, dan alur permintaan pesanan yang belum terhubung ke pembayaran atau provisioning otomatis. Fondasi **M1 database/RBAC** sudah ditambahkan, tetapi admin console dan payment production sengaja belum diaktifkan sebelum DB production, owner MFA, compliance, dan provider sandbox siap.
 
 ## Website production
 
@@ -27,6 +27,9 @@ Untuk IDE Antigravity, buka repository ini lalu jalankan `./run-local.sh` dari t
 
 - `php-app/public/` — web root dan asset yang boleh diakses publik.
 - `php-app/config/` — konfigurasi non-rahasia dan data katalog sementara.
+- `php-app/database/` — migration, seed RBAC, dan rollback MySQL/MariaDB.
+- `php-app/app/` — bootstrap PDO dan security helpers backend.
+- `php-app/bin/` — perintah CLI migration.
 - `docs/` — system design, project management, backend, frontend, API, data model, dan threat model.
 - `.agent/skills/` — aturan kerja agentic engineering yang wajib diikuti saat mengembangkan fitur.
 
@@ -45,6 +48,24 @@ php -l php-app/public/index.php
 ```
 
 Untuk deployment, gunakan PHP-FPM/Nginx atau Apache dengan document root menunjuk ke `php-app/public/`. Jangan pernah menjadikan `config/`, `storage/`, atau `.env` sebagai web root.
+
+## M1 database setup
+
+Salin `.env.example` menjadi `.env` di environment lokal/production dan isi kredensial database melalui secret manager. Jangan commit `.env`.
+
+```bash
+cd php-app
+php bin/migrate.php up
+php bin/migrate.php seed
+```
+
+Migration `down` bersifat destruktif dan hanya boleh dijalankan setelah review backup dan dependency production:
+
+```bash
+php bin/migrate.php down
+```
+
+Detail role, permission, admin console, dan release gate ada di [docs/admin-console-m1.md](docs/admin-console-m1.md).
 
 Deployment Vercel saat ini menggunakan upload production langsung karena GitHub App Vercel belum terpasang pada akun. Jika GitHub App diaktifkan, project dapat dihubungkan ke branch `main` agar deployment berjalan otomatis setiap push.
 
