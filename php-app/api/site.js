@@ -1,5 +1,5 @@
-const HTML_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/vCAYDJrvNrPOTTzo.html';
-const CSS_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/DaSSmxyqTIosbpOn.css';
+const HTML_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/mmfSwcFeeOmSspkC.html';
+const CSS_URL = 'https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/oMamGGLqqmcCvyhv.css';
 
 export default async function handler(_req, res) {
   const upstream = await fetch(HTML_URL);

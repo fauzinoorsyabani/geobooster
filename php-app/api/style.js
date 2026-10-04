@@ -1,5 +1,5 @@
 export default async function handler(_req, res) {
-  const upstream = await fetch('https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/DaSSmxyqTIosbpOn.css');
+  const upstream = await fetch('https://files.manuscdn.com/user_upload_by_module/session_file/310519663567085695/oMamGGLqqmcCvyhv.css');
 
   if (!upstream.ok) {
     return res.status(502).send('Geo Booster stylesheet unavailable');
