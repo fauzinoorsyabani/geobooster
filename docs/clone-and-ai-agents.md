@@ -2,13 +2,13 @@
 
 ## Repository status
 
-Repository canonical saat ini private:
+Repository canonical saat ini public:
 
 ```text
-https://github.com/fauzinoorsyabani/Dapur-Tanggal-Tua
+https://github.com/fauzinoorsyabani/geobooster
 ```
 
-GitHub sebelumnya menampilkan repository ini sebagai `Cek-Khodam`, tetapi repository telah di-rename oleh GitHub. Gunakan URL canonical di atas untuk clone baru.
+Repository ini sengaja dipisahkan dari repository lama yang sebelumnya menampilkan nama `Cek-Khodam`/`Dapur-Tanggal-Tua`. Gunakan URL `geobooster` untuk pekerjaan baru.
 
 ## Clone untuk IDE
 
@@ -16,18 +16,18 @@ GitHub sebelumnya menampilkan repository ini sebagai `Cek-Khodam`, tetapi reposi
 
 ```bash
 gh auth login
-gh repo clone fauzinoorsyabani/Dapur-Tanggal-Tua
-cd Dapur-Tanggal-Tua
+gh repo clone fauzinoorsyabani/geobooster
+cd geobooster
 ```
 
 ### Dengan Git HTTPS
 
 ```bash
-git clone https://github.com/fauzinoorsyabani/Dapur-Tanggal-Tua.git
-cd Dapur-Tanggal-Tua
+git clone https://github.com/fauzinoorsyabani/geobooster.git
+cd geobooster
 ```
 
-Private repository memerlukan GitHub login dengan akses repository. Jangan menaruh Personal Access Token di URL, README, `.env`, atau chat.
+Repository public dapat di-clone tanpa login. Login GitHub tetap diperlukan untuk push perubahan. Jangan menaruh Personal Access Token di URL, README, `.env`, atau chat.
 
 ## Kesiapan lokal yang sudah diverifikasi
 
