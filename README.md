@@ -59,7 +59,10 @@ Salin `.env.example` menjadi `.env` di environment lokal/production dan isi kred
 cd php-app
 php bin/migrate.php up
 php bin/migrate.php seed
+php bin/create-owner.php owner@example.com "Geo Booster Owner"
 ```
+
+Command owner meminta password secara interaktif, tidak membuat default password, dan harus diikuti aktivasi MFA sebelum production.
 
 Migration `down` bersifat destruktif dan hanya boleh dijalankan setelah review backup dan dependency production:
 

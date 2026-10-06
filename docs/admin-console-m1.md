@@ -67,6 +67,15 @@ Tidak ada default password di repository. Buat owner melalui one-time provisioni
 4. Login pertama memaksa session rotation.
 5. Catat provisioning pada audit log.
 
+Command yang tersedia:
+
+```bash
+cd php-app
+php bin/create-owner.php owner@example.com "Geo Booster Owner"
+```
+
+Password diminta secara interaktif dan tidak ditulis ke command history, source code, atau log aplikasi. Command ini harus dijalankan hanya setelah `up` dan `seed`, lalu MFA wajib diaktifkan sebelum production.
+
 ## Release gate
 
 Admin console belum boleh public sebelum:
