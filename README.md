@@ -43,6 +43,8 @@ Geo Booster tidak boleh menjual kredensial curian, akses ilegal, atau produk yan
 
 Mulai dari [System Design](docs/architecture.md), lalu baca [Project Management](docs/project-management.md) dan [Agentic Engineering](docs/agentic-engineering.md).
 
+Untuk deployment production PHP + database, gunakan [Deployment Architecture](docs/deployment-architecture.md). Rekomendasi MVP saat ini adalah Railway PHP service + Railway MySQL 8; Vercel tetap menjadi static preview sampai backend dipindahkan ke PHP runtime.
+
 ## Pengujian cepat
 
 ```bash

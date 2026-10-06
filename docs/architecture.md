@@ -72,5 +72,7 @@ Provider pembayaran, provider email, sumber katalog, dan strategi multi-tenant b
 
 ## References
 
+Deployment blueprint production tersedia di [Deployment Architecture](deployment-architecture.md), termasuk keputusan Railway PHP + MySQL 8, container document root, database operations, dan release sequence.
+
 [1]: https://owasp.org/www-project-application-security-verification-standard/ "OWASP Application Security Verification Standard"
 [2]: https://12factor.net/ "The Twelve-Factor App"
