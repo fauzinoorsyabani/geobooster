@@ -45,6 +45,8 @@ Mulai dari [System Design](docs/architecture.md), lalu baca [Project Management]
 
 Untuk deployment production PHP + database, gunakan [Deployment Architecture](docs/deployment-architecture.md). Rekomendasi MVP saat ini adalah Railway PHP service + Railway MySQL 8; Vercel tetap menjadi static preview sampai backend dipindahkan ke PHP runtime.
 
+Panduan clone private repository, setup MySQL lokal, dan workflow AI Agents ada di [Clone & AI Agents](docs/clone-and-ai-agents.md).
+
 ## Pengujian cepat
 
 ```bash
