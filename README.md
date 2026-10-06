@@ -1,63 +1,171 @@
 # Geo Booster
 
-Geo Booster adalah fondasi Software as a Service (SaaS) untuk katalog dan penjualan produk digital secara transparan, aman, dan mudah dioperasikan. Versi awal ini memakai **PHP 8.2+ tanpa TypeScript** untuk menjaga kurva belajar tetap rendah.
+> A secure, modular PHP commerce foundation for curated digital products.
 
-## Status proyek
+[![PHP](https://img.shields.io/badge/PHP-8.3%2B-777BB4?logo=php&logoColor=white)](https://www.php.net/)
+[![Database](https://img.shields.io/badge/MySQL-8.0%2B-4479A1?logo=mysql&logoColor=white)](https://www.mysql.com/)
+[![Architecture](https://img.shields.io/badge/Architecture-Modular%20Monolith-7A5CFF)](docs/architecture.md)
+[![Security](https://img.shields.io/badge/Security-OWASP%20informed-2E7D32)](docs/threat-model.md)
 
-Repositori ini sebelumnya berisi aplikasi React/TypeScript dari proyek lain. Fondasi Geo Booster ditambahkan sebagai aplikasi PHP mandiri di `php-app/` agar migrasi dapat dilakukan bertahap tanpa menghapus aset lama.
+Geo Booster is a PHP-first SaaS foundation for presenting and operating a curated catalog of digital products. It is designed for a small team that needs a reliable path from a public catalog to a secure internal operations console, followed by sandbox payment integration and auditable fulfillment.
 
-Versi yang tersedia saat ini adalah **catalogue-first MVP**: landing page, katalog produk, filter kategori, trust signals, dan alur permintaan pesanan yang belum terhubung ke pembayaran atau provisioning otomatis. Fondasi **M1 database/RBAC** sudah ditambahkan, tetapi admin console dan payment production sengaja belum diaktifkan sebelum DB production, owner MFA, compliance, dan provider sandbox siap.
+The project intentionally starts as a **modular monolith**. Domain boundaries are explicit, but operational complexity is kept low until real traffic, team ownership, and business requirements justify extracting services.
 
-## Website production
+## Current status
 
-Website permanen tersedia di [geo-booster-fauzins-projects.vercel.app](https://geo-booster-fauzins-projects.vercel.app/). Deployment production dibuat dari export statis `php-app/static/`, sedangkan aplikasi PHP di `php-app/public/` tetap menjadi source canonical untuk pengembangan backend berikutnya.
+| Capability | Status |
+|---|---|
+| Public catalog | Available |
+| Responsive visual design | Available |
+| Animated violet motion system | Available |
+| Product brand assets | Available |
+| WhatsApp inquiry flow | Available |
+| MySQL migration and rollback | Ready |
+| RBAC seed and permission model | Ready |
+| Admin login and console | Ready for a PHP + MySQL runtime |
+| Secure owner provisioning | Ready |
+| Payment integration | Not enabled; sandbox planning only |
+| Automated fulfillment | Not enabled |
+| Customer dashboard | Intentionally out of MVP |
 
-## Menjalankan lokal
+> **Important:** Geo Booster must not be used to sell stolen credentials, unauthorized access, or products that violate a provider's terms. Product source, reseller rights, terms, refund policy, and fulfillment eligibility must be verified before publication or payment activation.
 
-```bash
-cd php-app
-php -S 127.0.0.1:8080 -t public
+## Product direction
+
+Geo Booster follows this operating flow:
+
+```text
+Public catalog
+    → inquiry or checkout
+    → order review
+    → hosted payment provider
+    → verified signed webhook
+    → fulfillment task
+    → customer support and audit trail
 ```
 
-Buka `http://127.0.0.1:8080`.
+Payment is deliberately not enabled by default. A browser redirect is never treated as proof of payment; only a verified, idempotent provider webhook may transition an order to `paid`.
 
-Admin console M1 tersedia di `http://127.0.0.1:8080/admin/` setelah database terhubung dan migration/seed dijalankan. Tanpa database, route admin sengaja mengembalikan halaman `503` yang aman dan tidak membocorkan error koneksi.
+## Architecture at a glance
 
-Untuk IDE Antigravity, buka repository ini lalu jalankan `./run-local.sh` dari terminal. Panduan lengkap tersedia di [docs/antigravity.md](docs/antigravity.md).
-
-## Struktur penting
-
-- `php-app/public/` — web root dan asset yang boleh diakses publik.
-- `php-app/config/` — konfigurasi non-rahasia dan data katalog sementara.
-- `php-app/database/` — migration, seed RBAC, dan rollback MySQL/MariaDB.
-- `php-app/app/` — bootstrap PDO dan security helpers backend.
-- `php-app/bin/` — perintah CLI migration.
-- `docs/` — system design, project management, backend, frontend, API, data model, dan threat model.
-- `.agent/skills/` — aturan kerja agentic engineering yang wajib diikuti saat mengembangkan fitur.
-
-## Prinsip produk
-
-Geo Booster tidak boleh menjual kredensial curian, akses ilegal, atau produk yang melanggar kebijakan penyedia layanan. Integrasi pembayaran dan fulfillment hanya boleh diaktifkan setelah legalitas reseller, terms of service, refund policy, dan bukti kepemilikan lisensi diverifikasi.
-
-## Referensi internal
-
-Mulai dari [System Design](docs/architecture.md), lalu baca [Project Management](docs/project-management.md) dan [Agentic Engineering](docs/agentic-engineering.md).
-
-Untuk deployment production PHP + database, gunakan [Deployment Architecture](docs/deployment-architecture.md). Rekomendasi MVP saat ini adalah Railway PHP service + Railway MySQL 8; Vercel tetap menjadi static preview sampai backend dipindahkan ke PHP runtime.
-
-Panduan clone private repository, setup MySQL lokal, dan workflow AI Agents ada di [Clone & AI Agents](docs/clone-and-ai-agents.md).
-
-## Pengujian cepat
-
-```bash
-php -l php-app/public/index.php
+```text
+Customer / Admin Browser
+          │
+          ▼
+PHP Application — modular monolith
+  ├── Public catalog
+  ├── Auth and RBAC
+  ├── Catalog and inventory
+  ├── Orders
+  ├── Payment provider adapter
+  ├── Fulfillment tasks
+  ├── Notifications
+  └── Audit log
+          │
+          ├── MySQL 8 / MariaDB
+          ├── Payment provider webhook
+          ├── WhatsApp support flow
+          └── Monitoring and backups
 ```
 
-Untuk deployment, gunakan PHP-FPM/Nginx atau Apache dengan document root menunjuk ke `php-app/public/`. Jangan pernah menjadikan `config/`, `storage/`, atau `.env` sebagai web root.
+Recommended production topology:
 
-## M1 database setup
+```text
+GitHub → PHP web service (Railway or PHP-FPM host)
+                  │
+                  └── private network → MySQL 8
+```
 
-Salin `.env.example` menjadi `.env` di environment lokal/production dan isi kredensial database melalui secret manager. Jangan commit `.env`.
+The current Vercel site is a static catalog/preview deployment. The admin console, database, sessions, migrations, and future payment webhook require a PHP runtime and should not be deployed as static files.
+
+## Technology choices
+
+- **PHP 8.3+** — simple server-rendered application without TypeScript.
+- **PDO MySQL** — prepared statements, transactions, and least-privilege DB access.
+- **MySQL 8 / MariaDB** — relational source of truth for catalog, orders, payments, fulfillment, users, and audit logs.
+- **Apache or Nginx + PHP-FPM** — production runtime with `public/` as document root.
+- **Vanilla JavaScript and CSS** — progressive enhancement without a frontend build requirement.
+- **Hosted payment checkout** — provider-specific details isolated behind an adapter interface.
+- **Railway or equivalent PHP host** — practical MVP deployment with a managed/private MySQL service.
+
+## Repository structure
+
+```text
+.
+├── .agent/skills/                 # Geo Booster engineering rules for AI Agents
+├── docs/                          # Architecture, security, product, and operations docs
+├── php-app/
+│   ├── app/                       # Bootstrap and security/application services
+│   ├── bin/                       # Migration and owner provisioning commands
+│   ├── config/                    # Non-secret configuration
+│   ├── database/
+│   │   ├── migrations/            # Forward schema migrations
+│   │   ├── seeds/                 # RBAC and safe initial data
+│   │   └── rollback/              # Explicit rollback scripts
+│   ├── docker/                    # Production Apache configuration
+│   ├── public/                    # Public document root
+│   │   ├── admin/                 # Internal admin console
+│   │   ├── assets/                # Catalog assets
+│   │   └── index.php              # Public catalog entry point
+│   ├── storage/                   # Runtime storage; never public
+│   ├── Dockerfile                 # PHP 8.3 + Apache production image
+│   └── vercel.json                # Static/proxy deployment configuration
+├── .env.example                   # Environment variable template only
+└── run-local.sh                   # Local development launcher
+```
+
+## Quick start
+
+### Prerequisites
+
+- PHP 8.3 or newer.
+- MySQL 8 or MariaDB.
+- PHP extensions: `pdo_mysql` and `mbstring` recommended.
+- Git and GitHub access.
+
+### Clone
+
+```bash
+git clone https://github.com/fauzinoorsyabani/geobooster.git
+cd geobooster
+```
+
+### Configure local environment
+
+```bash
+cp .env.example .env
+```
+
+Set local values in `.env`:
+
+```env
+APP_ENV=local
+APP_URL=http://127.0.0.1:8080
+APP_KEY=generate-a-long-random-secret
+DB_DSN=mysql:host=127.0.0.1;port=3306;dbname=geo_booster;charset=utf8mb4
+DB_USERNAME=geo_booster
+DB_PASSWORD=your-local-password
+ADMIN_ENABLED=true
+SESSION_SECURE_COOKIE=false
+```
+
+Never commit `.env`. It is ignored by Git and should contain only local or secret-manager values.
+
+### Create the local database
+
+```bash
+sudo mysql
+```
+
+```sql
+CREATE DATABASE geo_booster CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'geo_booster'@'localhost' IDENTIFIED BY 'your-local-password';
+GRANT ALL PRIVILEGES ON geo_booster.* TO 'geo_booster'@'localhost';
+FLUSH PRIVILEGES;
+EXIT;
+```
+
+### Migrate and seed
 
 ```bash
 cd php-app
@@ -66,18 +174,181 @@ php bin/migrate.php seed
 php bin/create-owner.php owner@example.com "Geo Booster Owner"
 ```
 
-Command owner meminta password secara interaktif, tidak membuat default password, dan harus diikuti aktivasi MFA sebelum production.
+The owner command asks for a password interactively and hashes it with Argon2id. It does not create a default password.
 
-Migration `down` bersifat destruktif dan hanya boleh dijalankan setelah review backup dan dependency production:
+### Run the application
+
+From the repository root:
 
 ```bash
-php bin/migrate.php down
+./run-local.sh
 ```
 
-Detail role, permission, admin console, dan release gate ada di [docs/admin-console-m1.md](docs/admin-console-m1.md).
+Or directly:
 
-Deployment Vercel saat ini menggunakan upload production langsung karena GitHub App Vercel belum terpasang pada akun. Jika GitHub App diaktifkan, project dapat dihubungkan ke branch `main` agar deployment berjalan otomatis setiap push.
+```bash
+cd php-app
+php -S 127.0.0.1:8080 -t public
+```
 
-Katalog saat ini memuat **26 SKU** dari daftar inventory 21 September 2026. Harga sengaja tidak ditampilkan atau dikirim otomatis; customer menanyakannya melalui WhatsApp `+62 895-6092-50509`. Main page memiliki animasi orb, orbit, floating cards, spark, dan status pulse dengan dukungan `prefers-reduced-motion`. Dua belas visual produk dibuat sebagai aset brand original; SKU lain memakai visual kategori yang dioptimalkan sebagai fallback sampai aset individual berikutnya tersedia.
+Open:
 
-Kartu katalog terbaru menggunakan logo brand layanan masing-masing, termasuk Gemini, CapCut, Microsoft Office, Adobe, Canva, Figma, Prime Video, YouTube, HBO, Grok, dan lainnya. Detail source, mapping, dan catatan trademark ada di [docs/logo-assets.md](docs/logo-assets.md).
+- Public catalog: `http://127.0.0.1:8080/`
+- Admin console: `http://127.0.0.1:8080/admin/`
+
+## Database and security model
+
+The initial schema covers:
+
+- `users`, `roles`, `permissions`, `user_roles`, `role_permissions`
+- `products` and `skus`
+- `orders` and `order_items`
+- `payments` and `webhook_events`
+- `fulfillment_tasks`
+- `audit_logs`
+- `app_sessions`
+
+Security controls include:
+
+- PDO prepared statements.
+- Argon2id password hashing.
+- Session rotation after login.
+- HttpOnly and SameSite cookies.
+- CSRF token validation for mutations.
+- Server-side RBAC checks.
+- Audit logging for sensitive actions.
+- Unique provider event IDs for webhook idempotency.
+- Public document root restricted to `php-app/public`.
+- No payment secrets, customer credentials, or `.env` files in Git.
+
+## Roles
+
+| Role | Responsibility |
+|---|---|
+| `operator` | Support and fulfillment operations |
+| `admin` | Catalog, SKU, inventory, and order management |
+| `finance` | Payment, refund, and reconciliation visibility |
+| `super_admin` | User/role management and critical configuration |
+| `read_only` | Monitoring without mutation permissions |
+
+There is intentionally no customer dashboard in the MVP. A secure order link and WhatsApp support flow are simpler until customer account history becomes a demonstrated need.
+
+## Payment roadmap
+
+Payment is implemented as a provider adapter, not as provider-specific logic in the order domain:
+
+```php
+interface PaymentProvider
+{
+    public function createPayment(PaymentRequest $request): PaymentIntent;
+    public function verifyWebhook(string $rawBody, array $headers): VerifiedPaymentEvent;
+    public function refund(RefundRequest $request): RefundResult;
+}
+```
+
+Before production payment:
+
+1. Confirm the provider's official API, legal entity, sandbox, QRIS/payment methods, webhook signing, expiry, refund, and settlement behavior.
+2. Use hosted checkout.
+3. Verify raw webhook body, signature, timestamp, amount, currency, and provider event ID.
+4. Make webhook processing idempotent.
+5. Test duplicate, replayed, delayed, invalid, and mismatched events.
+6. Add reconciliation and refund SOP.
+7. Enable production behind a feature flag and internal allowlist.
+
+Do not guess the API or legal status of a provider referred to as “Curies” without official documentation.
+
+## Deployment
+
+The recommended MVP deployment is:
+
+```text
+Railway PHP Web Service + Railway MySQL 8
+```
+
+The repository includes:
+
+- `php-app/Dockerfile`
+- `php-app/docker/000-default.conf`
+- `docs/deployment-architecture.md`
+
+Deployment principles:
+
+- PHP service and database should be in the same region/private network.
+- `public/` is the only document root.
+- Secrets are supplied through environment variables or a secret manager.
+- Database backups and restore drills are mandatory.
+- Payment remains disabled until compliance and sandbox acceptance criteria pass.
+
+## AI Agents engineering contract
+
+Before changing code, an AI Agent must read the relevant README, architecture, threat model, migration, and module files. Every ticket must define:
+
+```text
+Goal:
+User/operator impact:
+Acceptance criteria:
+Out of scope:
+Security considerations:
+Data impact:
+Files likely affected:
+Verification commands:
+Rollback:
+```
+
+Every completed task must report:
+
+- Summary of changes.
+- Files touched.
+- Verification commands and results.
+- Remaining risks.
+- Recommended follow-up.
+
+AI Agents must not:
+
+- Commit secrets or expose `.env` values.
+- Create a default admin password.
+- Mark a payment paid from a browser redirect.
+- Bypass RBAC or CSRF checks.
+- Delete production records without a rollback plan.
+- Enable live payment without sandbox evidence and compliance approval.
+
+## Quality gates
+
+Before merge:
+
+```bash
+php -l php-app/public/index.php
+php -l php-app/public/admin/index.php
+php -l php-app/bin/migrate.php
+php -l php-app/bin/create-owner.php
+git diff --check
+```
+
+For payment or fulfillment changes, also require:
+
+- Invalid signature test.
+- Duplicate webhook test.
+- Replay test.
+- Amount mismatch test.
+- Authorization and CSRF tests.
+- Failure/retry test.
+- Audit trail verification.
+
+## Documentation map
+
+- [System Design](docs/architecture.md)
+- [Deployment Architecture](docs/deployment-architecture.md)
+- [Payment, RBAC, and AI Workflow](docs/architecture-payment-rbac-ai-workflow.md)
+- [Project Management](docs/project-management.md)
+- [Backend Standards](docs/backend.md)
+- [Frontend Standards](docs/frontend.md)
+- [Database Plan](docs/database-plan.md)
+- [Admin Console M1](docs/admin-console-m1.md)
+- [Threat Model](docs/threat-model.md)
+- [Clone and AI Agents Guide](docs/clone-and-ai-agents.md)
+- [Geo Booster Engineering Skill](.agent/skills/geo-booster-engineering/SKILL.md)
+
+## License and commercial notes
+
+This repository is a project foundation. Add an explicit license before accepting external contributions or distributing the code. Product names and logos remain subject to their respective trademark and usage policies. Business owners are responsible for verifying reseller rights, consumer terms, tax requirements, payment-provider requirements, and applicable law before going live.
