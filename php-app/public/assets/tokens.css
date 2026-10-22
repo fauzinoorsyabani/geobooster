@@ -1,0 +1,71 @@
+/* Hallmark · theme: cobalt · design tokens
+   Cool cobalt-on-light, dev-tool / API register. Never pure white, never pure
+   black. ONE electric cobalt signal accent; hairlines do the structural work. */
+
+:root {
+  /* ─── Colour ─────────────────────────────────────────────── */
+  --color-paper:   oklch(98.5% 0.004 250);  /* cool engineered near-white — page ground */
+  --color-paper-2: oklch(96.5% 0.005 252);  /* alt band / quiet inset */
+  --color-paper-3: oklch(94% 0.006 254);    /* card tint / chip ground */
+
+  --color-ink:     oklch(24% 0.02 258);     /* headlines + wordmark — cool charcoal */
+  --color-ink-2:   oklch(34% 0.018 257);    /* body copy */
+  --color-muted:   oklch(56% 0.013 255);    /* captions, meta, punctuation */
+
+  --color-rule:    oklch(91% 0.008 255);    /* hairlines */
+  --color-rule-2:  oklch(83% 0.011 255);    /* stronger hairline / hover rule */
+
+  --color-accent:     oklch(58% 0.20 256);  /* electric cobalt — THE one signal */
+  --color-accent-ink: oklch(99% 0.004 256); /* text on cobalt */
+  --color-accent-dim: oklch(58% 0.20 256 / 0.10); /* cobalt wash / focus halo */
+
+  --color-graphite:   oklch(22% 0.016 260); /* dark terminal / inventory ground */
+  --color-graphite-2: oklch(27% 0.018 260); /* window bar */
+  --color-graphite-3: oklch(34% 0.02 260);  /* card hairline */
+
+  --color-green:      oklch(62% 0.19 145);  /* live available dot */
+  --color-green-ink:  oklch(98% 0.01 145);
+  --color-green-dim:  oklch(62% 0.19 145 / 0.12);
+
+  /* ─── Type ───────────────────────────────────────────────── */
+  --font-display: "Space Grotesk", system-ui, -apple-system, sans-serif;
+  --font-body:    "Inter", system-ui, -apple-system, sans-serif;
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* fluid scale */
+  --step-hero:    clamp(2.4rem, 4.8vw + 0.5rem, 4.4rem);
+  --step-section: clamp(1.8rem, 3vw, 2.6rem);
+  --step-lede:    clamp(1rem, 0.75vw + 0.65rem, 1.25rem);
+  --step-body:    1rem;
+  --step-code:    0.85rem;
+  --step-small:   0.75rem;
+
+  --tracking-display: -0.035em;
+  --tracking-snug:    -0.015em;
+  --tracking-label:   0.06em;
+
+  --weight-body:    400;
+  --weight-medium:  500;
+  --weight-semi:    600;
+  --weight-bold:    700;
+
+  --leading-tight:  1.05;
+  --leading-snug:   1.2;
+  --leading-body:   1.6;
+  --measure:        62ch;
+
+  /* ─── Space & layout ─────────────────────────────────────── */
+  --gutter:     clamp(1.1rem, 4vw, 3.25rem);
+  --maxw:       1200px;
+  --section-y:  clamp(3.5rem, 7vw, 6rem);
+  --rule:       1px;
+
+  /* ─── Shape ──────────────────────────────────────────────── */
+  --radius-btn:  6px;
+  --radius-card: 8px;
+  --shadow-card: 0 1px 2px oklch(22% 0.016 260 / 0.06);
+
+  /* ─── Motion ─────────────────────────────────────────────── */
+  --ease-out:   cubic-bezier(0.16, 1, 0.3, 1);
+  --t-quiet:    180ms cubic-bezier(0.4, 0, 0.2, 1);
+}
