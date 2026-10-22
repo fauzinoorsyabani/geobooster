@@ -44,6 +44,21 @@ try {
     $totalFormatted = 'Rp' . number_format((int) ($order['total_minor'] / 100), 0, ',', '.');
     $itemName = !empty($items) ? $items[0]['sku_name_snapshot'] : 'Produk Digital ZiuLabs';
 
+    // WhatsApp Notification & Direct Chat Integration
+    $waNotifier = new \GeoBooster\Notifications\WhatsAppNotifier($db);
+    $waFulfillmentUrl = null;
+    if ($isPaid && !empty($order['customer_phone'])) {
+        $rawItems = json_decode($fulfillment['payload_encrypted'] ?? '[]', true) ?: [];
+        $waFulfillmentUrl = \GeoBooster\Notifications\WhatsAppNotifier::buildDirectChatUrl(
+            $order['customer_phone'],
+            $waNotifier->formatFulfillmentMessage($order, $rawItems)
+        );
+    }
+    $waCsHelpUrl = \GeoBooster\Notifications\WhatsAppNotifier::buildDirectChatUrl(
+        '62895609250509',
+        'Halo CS ZiuLabs, saya butuh bantuan untuk pesanan ' . $order['public_id']
+    );
+
 } catch (Throwable $e) {
     http_response_code(500);
     exit('Terjadi kesalahan database: ' . htmlspecialchars($e->getMessage()));
@@ -389,9 +404,17 @@ try {
             <tr><td>Email</td><td><?= htmlspecialchars($order['customer_email'] ?? '-') ?></td></tr>
           </table>
 
-          <a href="/dashboard/" class="btn-simulate-pay" style="text-align: center; text-decoration: none; display: block;">
-            Buka Riwayat di Customer Dashboard &rarr;
-          </a>
+          <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap;">
+            <?php if ($waFulfillmentUrl): ?>
+              <a href="<?= htmlspecialchars($waFulfillmentUrl) ?>" target="_blank" style="flex: 1; min-width: 220px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #22c55e; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); transition: background 0.2s;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+                Simpan di WhatsApp Saya
+              </a>
+            <?php endif; ?>
+            <a href="/dashboard/" class="btn-simulate-pay" style="flex: 1; min-width: 220px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
+              Buka Customer Dashboard &rarr;
+            </a>
+          </div>
 
         <?php else: ?>
           <!-- AWAITING PAYMENT (QRIS) VIEW -->
@@ -431,6 +454,13 @@ try {
             <tr><td>Pemesan</td><td><?= htmlspecialchars($order['customer_name'] ?? 'Pelanggan') ?> (<?= htmlspecialchars($order['customer_phone']) ?>)</td></tr>
             <tr><td>Metode</td><td>QRIS Nasional (Bebas Biaya Admin)</td></tr>
           </table>
+
+          <div style="text-align: center; margin-top: 14px;">
+            <a href="<?= htmlspecialchars($waCsHelpUrl) ?>" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #059669; text-decoration: none;">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
+              Butuh bantuan pembayaran? Chat CS di WhatsApp
+            </a>
+          </div>
 
           <script>
             // Live Polling every 3s to auto-detect payment completion

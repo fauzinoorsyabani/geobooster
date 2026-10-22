@@ -126,10 +126,27 @@ try {
 
     $db->commit();
 
+    // Trigger automated WhatsApp invoice notification
+    $waUrl = null;
+    try {
+        $notifier = new \GeoBooster\Notifications\WhatsAppNotifier($db);
+        $waRes = $notifier->sendInvoiceNotification([
+            'id' => $orderId,
+            'public_id' => $publicId,
+            'customer_name' => $customerName,
+            'customer_phone' => $customerPhone,
+            'total_minor' => $sku['price_minor'],
+        ], $itemName);
+        $waUrl = $waRes['direct_url'] ?? null;
+    } catch (\Throwable) {
+        // Non-blocking notification failure
+    }
+
     echo json_encode([
         'success' => true,
         'order_id' => $publicId,
         'redirect_url' => '/order/payment.php?id=' . urlencode($publicId),
+        'whatsapp_url' => $waUrl,
     ]);
     exit;
 

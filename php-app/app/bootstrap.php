@@ -33,4 +33,5 @@ if (file_exists($envFile)) {
 
 require_once __DIR__ . '/Security/Security.php';
 require_once __DIR__ . '/Fulfillment/FulfillmentEngine.php';
+require_once __DIR__ . '/Notifications/WhatsAppNotifier.php';
 

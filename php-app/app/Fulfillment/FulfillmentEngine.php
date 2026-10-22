@@ -22,7 +22,7 @@ final class FulfillmentEngine
     public function dispatchOrder(int $orderId): array
     {
         // 1. Fetch order details
-        $stmtOrder = $this->db->prepare('SELECT id, public_id, customer_name, customer_email, status FROM orders WHERE id = :id LIMIT 1');
+        $stmtOrder = $this->db->prepare('SELECT id, public_id, customer_name, customer_email, customer_phone, total_minor, status FROM orders WHERE id = :id LIMIT 1');
         $stmtOrder->execute(['id' => $orderId]);
         $order = $stmtOrder->fetch();
 
@@ -155,10 +155,26 @@ final class FulfillmentEngine
             'items_count' => count($items),
         ]);
 
+        // Automated WhatsApp notification
+        $notificationResult = null;
+        if ($allFulfilled && !empty($order['customer_phone'])) {
+            try {
+                $notifier = new \GeoBooster\Notifications\WhatsAppNotifier($this->db);
+                $notificationResult = $notifier->sendFulfillmentNotification($order, $fulfilledDetails);
+            } catch (\Throwable $e) {
+                // Ensure notification error does not break fulfillment transaction
+                $notificationResult = [
+                    'success' => false,
+                    'error' => $e->getMessage(),
+                ];
+            }
+        }
+
         return [
             'success' => true,
             'fully_fulfilled' => $allFulfilled,
             'items' => $fulfilledDetails,
+            'notification' => $notificationResult,
             'message' => $allFulfilled 
                 ? 'Semua item pesanan berhasil difulfill otomatis dari credential pool.'
                 : 'Sebagian atau semua item sedang mengantre fulfillment staf.',
