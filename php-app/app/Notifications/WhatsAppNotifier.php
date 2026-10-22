@@ -22,8 +22,13 @@ final class WhatsAppNotifier
         $this->provider = strtolower((string) (getenv('WA_PROVIDER') ?: 'mock'));
         $this->apiKey = (string) (getenv('WA_API_KEY') ?: '');
         $this->apiUrl = (string) (getenv('WA_API_URL') ?: 'https://api.fonnte.com/send');
-        $this->senderPhone = (string) (getenv('WA_SENDER_PHONE') ?: '62895609250509');
-        $this->appUrl = rtrim((string) (getenv('APP_URL') ?: 'http://127.0.0.1:8080'), '/');
+        $host = $_SERVER['HTTP_HOST'] ?? '';
+        if ($host !== '' && !str_starts_with($host, '127.0.0.1') && !str_starts_with($host, 'localhost')) {
+            $proto = ($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https' || (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http';
+            $this->appUrl = $proto . '://' . $host;
+        } else {
+            $this->appUrl = rtrim((string) (getenv('APP_URL') ?: 'http://127.0.0.1:8080'), '/');
+        }
     }
 
     /**
