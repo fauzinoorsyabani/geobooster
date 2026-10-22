@@ -20,6 +20,11 @@ declare(strict_types=1);
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@600;700&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet" />
 
+  <!-- Favicon / App Icons -->
+  <link rel="icon" type="image/png" href="/assets/logos/ziulabs-icon.png" />
+  <link rel="shortcut icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" href="/assets/logos/ziulabs-icon.png" />
+
   <!-- Stylesheet with Cache Busting -->
   <link rel="stylesheet" href="/assets/style.css?v=<?= filemtime(dirname(__DIR__, 2) . '/public/assets/style.css') ?>" />
 
