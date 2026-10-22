@@ -92,6 +92,31 @@ final class AuditLogger
     }
 }
 
+final class RateLimiter
+{
+    public function __construct(private readonly PDO $db) {}
+
+    public function checkLoginLimit(string $ip): bool
+    {
+        $hash = hash('sha256', $ip . (getenv('APP_KEY') ?: ''));
+        $stmt = $this->db->prepare('SELECT COUNT(*) FROM login_attempts WHERE ip_hash = :ip_hash AND attempted_at > NOW() - INTERVAL 10 MINUTE');
+        $stmt->execute(['ip_hash' => $hash]);
+        return (int) $stmt->fetchColumn() < 5;
+    }
+
+    public function recordLoginAttempt(string $ip): void
+    {
+        $hash = hash('sha256', $ip . (getenv('APP_KEY') ?: ''));
+        $this->db->prepare('INSERT INTO login_attempts (ip_hash) VALUES (:ip_hash)')->execute(['ip_hash' => $hash]);
+    }
+
+    public function clearLoginAttempts(string $ip): void
+    {
+        $hash = hash('sha256', $ip . (getenv('APP_KEY') ?: ''));
+        $this->db->prepare('DELETE FROM login_attempts WHERE ip_hash = :ip_hash')->execute(['ip_hash' => $hash]);
+    }
+}
+
 final class Auth
 {
     public function __construct(private readonly PDO $db) {}
@@ -99,15 +124,18 @@ final class Auth
     public function attempt(string $email, string $password): bool
     {
         Csrf::start();
+        $audit = new AuditLogger($this->db);
         $statement = $this->db->prepare('SELECT id, password_hash FROM users WHERE email = :email AND status = \'active\' LIMIT 1');
         $statement->execute(['email' => strtolower(trim($email))]);
         $user = $statement->fetch();
         if (!is_array($user) || !password_verify($password, $user['password_hash'])) {
+            $audit->record(null, 'login_failure', 'user', null);
             return false;
         }
         session_regenerate_id(true);
         $_SESSION['user_id'] = (int) $user['id'];
         $this->db->prepare('UPDATE users SET last_login_at = CURRENT_TIMESTAMP WHERE id = :id')->execute(['id' => $user['id']]);
+        $audit->record((int) $user['id'], 'login_success', 'user', (int) $user['id']);
         return true;
     }
 
