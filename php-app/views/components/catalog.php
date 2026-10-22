@@ -72,27 +72,47 @@ declare(strict_types=1);
             <div class="card-footer">
               <div class="price-inquiry">
                 <span class="inquiry-label">Harga Paket</span>
+                <?php if (!empty($item['original_price'])): ?>
+                  <div class="price-discount-stack">
+                    <span class="price-orig"><?= e($item['original_price']) ?></span>
+                    <span class="discount-badge"><?= e($item['discount'] ?? '50%') ?></span>
+                  </div>
+                <?php endif; ?>
                 <span class="inquiry-val"><?= e($item['price']) ?></span>
               </div>
               
               <div class="card-btn-group">
                 <?php if ($isLive): ?>
+                  <button type="button" class="btn-card-cart js-add-to-cart"
+                          data-product-id="<?= e((string)($item['id'] ?? 1)) ?>"
+                          data-sku-id="<?= e((string)($item['sku_id'] ?? 1)) ?>"
+                          data-sku="<?= e($item['sku']) ?>"
+                          data-name="<?= e($item['name']) ?>"
+                          data-price="<?= e($item['price']) ?>"
+                          data-price-minor="<?= e((string)($item['price_minor'] ?? 5000000)) ?>"
+                          data-logo="/assets/logos/<?= e(brandLogo($item['name'])) ?>"
+                          title="Tambah ke Keranjang">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                    <span>+ Keranjang</span>
+                  </button>
+
                   <button type="button" class="btn-card-buy js-open-checkout"
                           data-product-id="<?= e((string)($item['id'] ?? 1)) ?>"
                           data-sku-id="<?= e((string)($item['sku_id'] ?? 1)) ?>"
                           data-sku="<?= e($item['sku']) ?>"
                           data-name="<?= e($item['name']) ?>"
                           data-price="<?= e($item['price']) ?>"
+                          data-price-minor="<?= e((string)($item['price_minor'] ?? 5000000)) ?>"
                           data-logo="/assets/logos/<?= e(brandLogo($item['name'])) ?>"
                           title="Beli Langsung via QRIS">
                     <span>⚡ Beli</span>
                   </button>
+                <?php else: ?>
+                  <a class="btn-card-order sold-out-link" href="<?= e($waLink) ?>" target="_blank" rel="noopener" title="Tanyakan info restok via WhatsApp">
+                    <span>💬 Info Stok WA</span>
+                    <span>↗</span>
+                  </a>
                 <?php endif; ?>
-
-                <a class="btn-card-order <?= $isLive ? 'secondary' : '' ?>" href="<?= e($waLink) ?>" target="_blank" rel="noopener" title="Konsultasi via WhatsApp">
-                  <span><?= $isLive ? 'WA' : 'Info Stok' ?></span>
-                  <span>↗</span>
-                </a>
               </div>
             </div>
           </div>

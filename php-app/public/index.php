@@ -40,5 +40,6 @@ require __DIR__ . '/../views/components/footer.php';
 require __DIR__ . '/../views/components/ziubot-widget.php';
 require __DIR__ . '/../views/components/cmdk.php';
 require __DIR__ . '/../views/components/checkout-modal.php';
+require __DIR__ . '/../views/components/cart-drawer.php';
 require __DIR__ . '/../views/layouts/scripts.php';
 

@@ -243,14 +243,267 @@ declare(strict_types=1);
       });
     }
 
+    // ─── Shopping Cart System & LocalStorage State ───
+    var cartModal = document.getElementById('cart-drawer-modal');
+    var cartNavBtn = document.getElementById('cart-nav-btn');
+    var btnCloseCart = document.getElementById('btn-close-cart');
+    var btnCheckoutCart = document.getElementById('btn-checkout-cart');
+    var btnClearCart = document.getElementById('btn-clear-cart');
+    var btnBrowseCatalog = document.getElementById('btn-browse-catalog');
+    var cartBadgeCount = document.getElementById('cart-badge-count');
+    var cartDrawerBadge = document.getElementById('cart-drawer-badge');
+    var cartEmptyView = document.getElementById('cart-empty-view');
+    var cartItemsView = document.getElementById('cart-items-view');
+    var cartItemsList = document.getElementById('cart-items-list');
+    var cartFooter = document.getElementById('cart-footer');
+    var cartSubtotalVal = document.getElementById('cart-subtotal-val');
+    var cartDiscountRow = document.getElementById('cart-discount-row');
+    var cartDiscountVal = document.getElementById('cart-discount-val');
+    var cartTotalVal = document.getElementById('cart-total-val');
+    var cartToast = document.getElementById('cart-toast');
+    var toastTitle = document.getElementById('toast-title');
+    var toastDesc = document.getElementById('toast-desc');
+    var toastViewCart = document.getElementById('toast-view-cart');
+    var toastTimer = null;
+
+    var ZiuCart = {
+      items: [],
+      load: function() {
+        try {
+          var saved = localStorage.getItem('ziulabs_cart');
+          this.items = saved ? JSON.parse(saved) : [];
+          if (!Array.isArray(this.items)) this.items = [];
+        } catch(e) {
+          this.items = [];
+        }
+        this.render();
+      },
+      save: function() {
+        try {
+          localStorage.setItem('ziulabs_cart', JSON.stringify(this.items));
+        } catch(e) {}
+        this.render();
+      },
+      add: function(product) {
+        var existing = this.items.find(function(it) { return it.sku_id == product.skuId; });
+        if (existing) {
+          existing.quantity += 1;
+        } else {
+          var priceMinor = parseInt(product.priceMinor, 10) || 5000000;
+          this.items.push({
+            sku_id: parseInt(product.skuId, 10),
+            product_id: parseInt(product.productId, 10) || 1,
+            sku: product.sku || 'SKU',
+            name: product.name || 'Produk Digital',
+            price: product.price || 'Rp50.000',
+            price_minor: priceMinor,
+            logo: product.logo || '/assets/logos/gemini.webp',
+            quantity: 1
+          });
+        }
+        this.save();
+        this.showToast(product.name, 'Berhasil ditambahkan ke keranjang!');
+        this.open();
+      },
+      remove: function(skuId) {
+        this.items = this.items.filter(function(it) { return it.sku_id != skuId; });
+        this.save();
+      },
+      updateQty: function(skuId, delta) {
+        var item = this.items.find(function(it) { return it.sku_id == skuId; });
+        if (item) {
+          item.quantity = Math.max(1, item.quantity + delta);
+          this.save();
+        }
+      },
+      clear: function() {
+        this.items = [];
+        this.save();
+      },
+      getTotalMinor: function() {
+        return this.items.reduce(function(acc, it) {
+          return acc + (it.price_minor * it.quantity);
+        }, 0);
+      },
+      getItemCount: function() {
+        return this.items.reduce(function(acc, it) { return acc + it.quantity; }, 0);
+      },
+      formatRupiah: function(amountMinor) {
+        var val = Math.floor(amountMinor / 100);
+        return 'Rp' + val.toString().replace(/\B(?=(\d{3})+(?!\d))/g, '.');
+      },
+      render: function() {
+        var count = this.getItemCount();
+        if (cartBadgeCount) {
+          cartBadgeCount.textContent = count;
+          cartBadgeCount.style.display = count > 0 ? 'inline-block' : 'none';
+        }
+        if (cartDrawerBadge) {
+          cartDrawerBadge.textContent = count + ' Item';
+        }
+
+        if (this.items.length === 0) {
+          if (cartEmptyView) cartEmptyView.style.display = 'flex';
+          if (cartItemsView) cartItemsView.style.display = 'none';
+          if (cartFooter) cartFooter.style.display = 'none';
+          return;
+        }
+
+        if (cartEmptyView) cartEmptyView.style.display = 'none';
+        if (cartItemsView) cartItemsView.style.display = 'block';
+        if (cartFooter) cartFooter.style.display = 'block';
+
+        if (cartItemsList) {
+          var html = '';
+          var self = this;
+          this.items.forEach(function(item) {
+            var itemTotal = item.price_minor * item.quantity;
+            html += '<div class="cart-item-card" data-sku-id="' + item.sku_id + '">';
+            html += '  <img src="' + item.logo + '" alt="' + item.name + '" class="cart-item-img">';
+            html += '  <div class="cart-item-info">';
+            html += '    <h4 class="cart-item-title">' + item.name + '</h4>';
+            html += '    <div class="cart-item-sku">' + item.sku + ' &bull; ' + item.price + '</div>';
+            html += '    <div class="cart-item-bottom">';
+            html += '      <div class="cart-item-price">' + self.formatRupiah(itemTotal) + '</div>';
+            html += '      <div style="display: flex; align-items: center;">';
+            html += '        <div class="cart-qty-ctrl">';
+            html += '          <button type="button" class="cart-qty-btn js-qty-minus" data-sku-id="' + item.sku_id + '">&minus;</button>';
+            html += '          <span class="cart-qty-val">' + item.quantity + '</span>';
+            html += '          <button type="button" class="cart-qty-btn js-qty-plus" data-sku-id="' + item.sku_id + '">&plus;</button>';
+            html += '        </div>';
+            html += '        <button type="button" class="cart-item-del js-item-del" data-sku-id="' + item.sku_id + '" title="Hapus Item">&times;</button>';
+            html += '      </div>';
+            html += '    </div>';
+            html += '  </div>';
+            html += '</div>';
+          });
+          cartItemsList.innerHTML = html;
+        }
+
+        var totalMinor = this.getTotalMinor();
+        if (cartSubtotalVal) cartSubtotalVal.textContent = this.formatRupiah(totalMinor);
+        if (cartTotalVal) cartTotalVal.textContent = this.formatRupiah(totalMinor);
+
+        // Calculate hemat demo (Gemini promo)
+        var totalSavings = this.items.reduce(function(acc, it) {
+          if (it.name.toLowerCase().indexOf('gemini') !== -1) {
+            return acc + (5000000 * it.quantity);
+          }
+          return acc;
+        }, 0);
+
+        if (cartDiscountRow) {
+          if (totalSavings > 0) {
+            cartDiscountRow.style.display = 'flex';
+            if (cartDiscountVal) cartDiscountVal.textContent = '- ' + this.formatRupiah(totalSavings);
+          } else {
+            cartDiscountRow.style.display = 'none';
+          }
+        }
+      },
+      open: function() {
+        if (!cartModal) return;
+        this.render();
+        cartModal.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      },
+      close: function() {
+        if (!cartModal) return;
+        cartModal.classList.remove('is-open');
+        document.body.style.overflow = '';
+      },
+      showToast: function(title, desc) {
+        if (!cartToast) return;
+        if (toastTitle) toastTitle.textContent = title;
+        if (toastDesc) toastDesc.textContent = desc;
+        cartToast.classList.add('is-shown');
+        clearTimeout(toastTimer);
+        toastTimer = setTimeout(function() {
+          cartToast.classList.remove('is-shown');
+        }, 3500);
+      }
+    };
+
+    // Initialize cart on page load
+    ZiuCart.load();
+
+    if (cartNavBtn) {
+      cartNavBtn.addEventListener('click', function() { ZiuCart.open(); });
+    }
+    if (btnCloseCart) {
+      btnCloseCart.addEventListener('click', function() { ZiuCart.close(); });
+    }
+    if (cartModal) {
+      cartModal.addEventListener('click', function(e) {
+        if (e.target === cartModal) ZiuCart.close();
+      });
+    }
+    if (btnBrowseCatalog) {
+      btnBrowseCatalog.addEventListener('click', function() {
+        ZiuCart.close();
+        var catEl = document.getElementById('catalog');
+        if (catEl) catEl.scrollIntoView({ behavior: 'smooth' });
+      });
+    }
+    if (btnClearCart) {
+      btnClearCart.addEventListener('click', function() {
+        if (confirm('Kosongkan semua item di keranjang?')) {
+          ZiuCart.clear();
+        }
+      });
+    }
+    if (toastViewCart) {
+      toastViewCart.addEventListener('click', function() {
+        if (cartToast) cartToast.classList.remove('is-shown');
+        ZiuCart.open();
+      });
+    }
+
+    // Cart item delegation: plus, minus, delete, add
+    document.addEventListener('click', function(e) {
+      var plusBtn = e.target.closest('.js-qty-plus');
+      if (plusBtn) {
+        e.preventDefault();
+        ZiuCart.updateQty(plusBtn.dataset.skuId, 1);
+        return;
+      }
+      var minusBtn = e.target.closest('.js-qty-minus');
+      if (minusBtn) {
+        e.preventDefault();
+        ZiuCart.updateQty(minusBtn.dataset.skuId, -1);
+        return;
+      }
+      var delBtn = e.target.closest('.js-item-del');
+      if (delBtn) {
+        e.preventDefault();
+        ZiuCart.remove(delBtn.dataset.skuId);
+        return;
+      }
+      var addCartBtn = e.target.closest('.js-add-to-cart');
+      if (addCartBtn) {
+        e.preventDefault();
+        ZiuCart.add(addCartBtn.dataset);
+        return;
+      }
+    });
+
     // ─── Instant Checkout Drawer Interaction ───
     var checkoutModal = document.getElementById('checkout-modal');
     var btnCloseCheckout = document.getElementById('btn-close-checkout');
     var checkoutForm = document.getElementById('checkout-form');
     var chkAlert = document.getElementById('checkout-alert');
+    var chkSingleSummary = document.getElementById('chk-single-summary');
+    var chkCartSummary = document.getElementById('chk-cart-summary');
+    var chkCartItemCount = document.getElementById('chk-cart-item-count');
+    var chkCartItemsPreview = document.getElementById('chk-cart-items-preview');
+    var chkInputCartItems = document.getElementById('chk-input-cart-items');
 
     function openCheckout(data) {
       if (!checkoutModal) return;
+      if (chkInputCartItems) chkInputCartItems.value = '';
+      if (chkSingleSummary) chkSingleSummary.style.display = 'flex';
+      if (chkCartSummary) chkCartSummary.style.display = 'none';
+
       document.getElementById('chk-input-product-id').value = data.productId || '';
       document.getElementById('chk-input-sku-id').value = data.skuId || '';
       document.getElementById('chk-name').textContent = data.name || 'Produk Digital';
@@ -267,6 +520,52 @@ declare(strict_types=1);
       }
       checkoutModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
+    }
+
+    function openCartCheckout() {
+      if (!checkoutModal || ZiuCart.items.length === 0) return;
+      ZiuCart.close();
+
+      if (chkSingleSummary) chkSingleSummary.style.display = 'none';
+      if (chkCartSummary) chkCartSummary.style.display = 'block';
+
+      if (chkInputCartItems) {
+        var cartPayload = ZiuCart.items.map(function(it) {
+          return { sku_id: it.sku_id, quantity: it.quantity };
+        });
+        chkInputCartItems.value = JSON.stringify(cartPayload);
+      }
+      document.getElementById('chk-input-sku-id').value = '';
+      document.getElementById('chk-input-product-id').value = '';
+
+      var count = ZiuCart.getItemCount();
+      if (chkCartItemCount) chkCartItemCount.textContent = count + ' Item';
+
+      if (chkCartItemsPreview) {
+        var previewHtml = '';
+        ZiuCart.items.forEach(function(it) {
+          previewHtml += '<div style="display: flex; align-items: center; justify-content: space-between; font-size: 0.85rem; padding: 4px 0; border-bottom: 1px dashed #e2e8f0;">';
+          previewHtml += '  <span style="font-weight: 600; color: #1e293b;">' + it.name + ' <span style="color: #64748b; font-size: 0.78rem;">(' + it.quantity + 'x)</span></span>';
+          previewHtml += '  <strong style="color: #0066ff;">' + ZiuCart.formatRupiah(it.price_minor * it.quantity) + '</strong>';
+          previewHtml += '</div>';
+        });
+        chkCartItemsPreview.innerHTML = previewHtml;
+      }
+
+      var totalFormatted = ZiuCart.formatRupiah(ZiuCart.getTotalMinor());
+      document.getElementById('chk-subtotal').textContent = totalFormatted;
+      document.getElementById('chk-grand-total').textContent = totalFormatted;
+
+      if (chkAlert) {
+        chkAlert.style.display = 'none';
+        chkAlert.textContent = '';
+      }
+      checkoutModal.classList.add('is-open');
+      document.body.style.overflow = 'hidden';
+    }
+
+    if (btnCheckoutCart) {
+      btnCheckoutCart.addEventListener('click', openCartCheckout);
     }
 
     function closeCheckout() {
@@ -328,6 +627,10 @@ declare(strict_types=1);
         })
         .then(function(result) {
           if (result.ok && result.data.success && result.data.redirect_url) {
+            // Clear cart if this was a cart order
+            if (chkInputCartItems && chkInputCartItems.value) {
+              ZiuCart.clear();
+            }
             window.location.href = result.data.redirect_url;
           } else {
             throw new Error(result.data.error || 'Terjadi kesalahan saat memproses pesanan.');

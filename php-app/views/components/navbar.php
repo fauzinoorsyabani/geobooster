@@ -30,6 +30,17 @@ declare(strict_types=1);
         <kbd>⌘K</kbd>
       </button>
 
+      <!-- Cart Drawer Trigger Button -->
+      <button class="cart-trigger-btn" id="cart-nav-btn" type="button" aria-label="Buka Keranjang Belanja" title="Lihat Keranjang Belanja">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="9" cy="21" r="1"></circle>
+          <circle cx="20" cy="21" r="1"></circle>
+          <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path>
+        </svg>
+        <span class="cart-btn-label">Keranjang</span>
+        <span class="cart-badge-count" id="cart-badge-count">0</span>
+      </button>
+
       <!-- Clerk Authentication Slot (UserButton & Sign In) -->
       <div id="clerk-auth-slot" class="clerk-auth-slot">
         <a href="/dashboard/" class="btn-header-dash" id="btn-header-dash" style="display: none;" title="Buka Dashboard Pesanan">

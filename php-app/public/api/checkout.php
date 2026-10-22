@@ -25,17 +25,17 @@ try {
 
     $db = Database::connect();
 
+    $cartItemsRaw = trim((string) ($_POST['cart_items'] ?? ''));
+    $cartItems = [];
+    if ($cartItemsRaw !== '') {
+        $cartItems = json_decode($cartItemsRaw, true) ?: [];
+    }
+
     $skuId = filter_input(INPUT_POST, 'sku_id', FILTER_VALIDATE_INT);
     $customerName = trim((string) ($_POST['customer_name'] ?? ''));
     $customerPhone = trim((string) ($_POST['customer_phone'] ?? ''));
     $customerEmail = strtolower(trim((string) ($_POST['customer_email'] ?? '')));
     $paymentMethod = (string) ($_POST['payment_method'] ?? 'qris');
-
-    if (!$skuId || $skuId <= 0) {
-        http_response_code(422);
-        echo json_encode(['success' => false, 'error' => 'Produk tidak valid.']);
-        exit;
-    }
 
     if ($customerName === '' || strlen($customerName) > 120) {
         http_response_code(422);
@@ -59,25 +59,97 @@ try {
         $paymentMethod = 'qris';
     }
 
-    // Fetch SKU and product info
-    $stmt = $db->prepare(
-        'SELECT s.id AS sku_id, s.price_minor, s.currency, s.stock_status, s.terms_version, p.name AS product_name, s.label AS sku_label 
-         FROM skus s 
-         JOIN products p ON p.id = s.product_id 
-         WHERE s.id = :sku_id LIMIT 1'
-    );
-    $stmt->execute(['sku_id' => $skuId]);
-    $sku = $stmt->fetch();
+    // Resolve items to order (either from cart or single SKU)
+    $itemsToOrder = [];
+    $totalMinor = 0;
+    $currency = 'IDR';
+    $termsVersion = 'v1.0';
 
-    if (!$sku) {
-        http_response_code(404);
-        echo json_encode(['success' => false, 'error' => 'SKU produk tidak ditemukan.']);
-        exit;
+    if (!empty($cartItems)) {
+        // Multi-item cart checkout
+        foreach ($cartItems as $cItem) {
+            $cSkuId = (int) ($cItem['sku_id'] ?? 0);
+            $cQty = max(1, (int) ($cItem['quantity'] ?? 1));
+            if ($cSkuId <= 0) continue;
+
+            $stmt = $db->prepare(
+                'SELECT s.id AS sku_id, s.price_minor, s.currency, s.stock_status, s.terms_version, p.name AS product_name, s.label AS sku_label 
+                 FROM skus s 
+                 JOIN products p ON p.id = s.product_id 
+                 WHERE s.id = :sku_id LIMIT 1'
+            );
+            $stmt->execute(['sku_id' => $cSkuId]);
+            $skuRow = $stmt->fetch();
+
+            if (!$skuRow) {
+                http_response_code(404);
+                echo json_encode(['success' => false, 'error' => "Produk (SKU #{$cSkuId}) tidak ditemukan."]);
+                exit;
+            }
+
+            if ($skuRow['stock_status'] !== 'available') {
+                http_response_code(409);
+                echo json_encode(['success' => false, 'error' => "Maaf, stok produk '{$skuRow['product_name']}' sedang habis."]);
+                exit;
+            }
+
+            $currency = $skuRow['currency'];
+            $termsVersion = $skuRow['terms_version'];
+            $lineName = $skuRow['product_name'] . ($skuRow['sku_label'] !== 'Default' ? ' (' . $skuRow['sku_label'] . ')' : '');
+            $totalMinor += ((int) $skuRow['price_minor']) * $cQty;
+
+            $itemsToOrder[] = [
+                'sku_id' => (int) $skuRow['sku_id'],
+                'name' => $lineName,
+                'price_minor' => (int) $skuRow['price_minor'],
+                'quantity' => $cQty,
+            ];
+        }
+    } else {
+        // Single SKU checkout
+        if (!$skuId || $skuId <= 0) {
+            http_response_code(422);
+            echo json_encode(['success' => false, 'error' => 'Produk tidak valid.']);
+            exit;
+        }
+
+        $stmt = $db->prepare(
+            'SELECT s.id AS sku_id, s.price_minor, s.currency, s.stock_status, s.terms_version, p.name AS product_name, s.label AS sku_label 
+             FROM skus s 
+             JOIN products p ON p.id = s.product_id 
+             WHERE s.id = :sku_id LIMIT 1'
+        );
+        $stmt->execute(['sku_id' => $skuId]);
+        $skuRow = $stmt->fetch();
+
+        if (!$skuRow) {
+            http_response_code(404);
+            echo json_encode(['success' => false, 'error' => 'SKU produk tidak ditemukan.']);
+            exit;
+        }
+
+        if ($skuRow['stock_status'] !== 'available') {
+            http_response_code(409);
+            echo json_encode(['success' => false, 'error' => 'Maaf, stok produk ini sedang habis atau tidak tersedia.']);
+            exit;
+        }
+
+        $currency = $skuRow['currency'];
+        $termsVersion = $skuRow['terms_version'];
+        $lineName = $skuRow['product_name'] . ($skuRow['sku_label'] !== 'Default' ? ' (' . $skuRow['sku_label'] . ')' : '');
+        $totalMinor = (int) $skuRow['price_minor'];
+
+        $itemsToOrder[] = [
+            'sku_id' => (int) $skuRow['sku_id'],
+            'name' => $lineName,
+            'price_minor' => (int) $skuRow['price_minor'],
+            'quantity' => 1,
+        ];
     }
 
-    if ($sku['stock_status'] !== 'available') {
-        http_response_code(409);
-        echo json_encode(['success' => false, 'error' => 'Maaf, stok produk ini sedang habis atau tidak tersedia.']);
+    if (empty($itemsToOrder)) {
+        http_response_code(422);
+        echo json_encode(['success' => false, 'error' => 'Keranjang pesanan kosong.']);
         exit;
     }
 
@@ -86,7 +158,9 @@ try {
 
     // Generate 26-char public ID (e.g. ord_ + 22 chars)
     $publicId = 'ord_' . rtrim(strtr(base64_encode(random_bytes(16)), '+/', '-_'), '=');
-    $itemName = $sku['product_name'] . ($sku['sku_label'] !== 'Default' ? ' (' . $sku['sku_label'] . ')' : '');
+    $summaryItemName = count($itemsToOrder) === 1 
+        ? $itemsToOrder[0]['name'] 
+        : $itemsToOrder[0]['name'] . ' (+' . (count($itemsToOrder) - 1) . ' item lainnya)';
 
     $orderStmt = $db->prepare(
         'INSERT INTO orders (public_id, customer_name, customer_email, customer_phone, status, payment_method, total_minor, currency, terms_version, expires_at) 
@@ -98,30 +172,33 @@ try {
         'customer_email' => $customerEmail,
         'customer_phone' => $customerPhone,
         'payment_method' => $paymentMethod,
-        'total_minor' => $sku['price_minor'],
-        'currency' => $sku['currency'],
-        'terms_version' => $sku['terms_version'],
+        'total_minor' => $totalMinor,
+        'currency' => $currency,
+        'terms_version' => $termsVersion,
     ]);
 
     $orderId = (int) $db->lastInsertId();
 
     $itemStmt = $db->prepare(
         'INSERT INTO order_items (order_id, sku_id, sku_name_snapshot, unit_price_minor, quantity) 
-         VALUES (:order_id, :sku_id, :sku_name, :price_minor, 1)'
+         VALUES (:order_id, :sku_id, :sku_name, :price_minor, :quantity)'
     );
-    $itemStmt->execute([
-        'order_id' => $orderId,
-        'sku_id' => $sku['sku_id'],
-        'sku_name' => $itemName,
-        'price_minor' => $sku['price_minor'],
-    ]);
+    foreach ($itemsToOrder as $ordItem) {
+        $itemStmt->execute([
+            'order_id' => $orderId,
+            'sku_id' => $ordItem['sku_id'],
+            'sku_name' => $ordItem['name'],
+            'price_minor' => $ordItem['price_minor'],
+            'quantity' => $ordItem['quantity'],
+        ]);
+    }
 
     // Audit log
     $userId = $_SESSION['user_id'] ?? null;
     (new AuditLogger($db))->record($userId ? (int) $userId : null, 'order_created', 'order', $orderId, [
         'public_id' => $publicId,
-        'sku_id' => $skuId,
-        'amount_minor' => $sku['price_minor'],
+        'item_count' => count($itemsToOrder),
+        'amount_minor' => $totalMinor,
     ]);
 
     $db->commit();
@@ -135,8 +212,8 @@ try {
             'public_id' => $publicId,
             'customer_name' => $customerName,
             'customer_phone' => $customerPhone,
-            'total_minor' => $sku['price_minor'],
-        ], $itemName);
+            'total_minor' => $totalMinor,
+        ], $summaryItemName);
         $waUrl = $waRes['direct_url'] ?? null;
     } catch (\Throwable) {
         // Non-blocking notification failure

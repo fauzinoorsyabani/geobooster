@@ -23,17 +23,27 @@ $defaultEmail = $_SESSION['user_email'] ?? '';
 
     <!-- Product Summary Card -->
     <div class="checkout-product-summary">
-      <img src="/assets/logos/gemini.webp" alt="Logo" class="checkout-item-logo" id="chk-logo" width="44" height="44">
-      <div class="checkout-item-details">
-        <div class="checkout-item-meta">
-          <span class="checkout-badge-sku" id="chk-sku">AI-GEM-18M</span>
-          <span class="checkout-badge-status">Stok Siap</span>
+      <div id="chk-single-summary" style="display: flex; align-items: center; gap: 14px; width: 100%;">
+        <img src="/assets/logos/gemini.webp" alt="Logo" class="checkout-item-logo" id="chk-logo" width="44" height="44">
+        <div class="checkout-item-details">
+          <div class="checkout-item-meta">
+            <span class="checkout-badge-sku" id="chk-sku">AI-GEM-18M</span>
+            <span class="checkout-badge-status">Stok Siap</span>
+          </div>
+          <h4 class="checkout-item-name" id="chk-name">Gemini Pro 18 Months Head (Link)</h4>
+          <div class="checkout-item-price-wrap">
+            <span class="checkout-item-price" id="chk-price">Rp50.000</span>
+            <span class="checkout-item-guarantee">✓ Garansi 30 Hari &amp; Akses Resmi</span>
+          </div>
         </div>
-        <h4 class="checkout-item-name" id="chk-name">Gemini Pro 18 Months Head (Link)</h4>
-        <div class="checkout-item-price-wrap">
-          <span class="checkout-item-price" id="chk-price">Rp12.900</span>
-          <span class="checkout-item-guarantee">✓ Garansi Penuh &amp; Akses Resmi</span>
+      </div>
+
+      <div id="chk-cart-summary" style="display: none; width: 100%;">
+        <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+          <span style="font-size: 0.8rem; font-weight: 700; color: #64748b; text-transform: uppercase;">Daftar Item Keranjang</span>
+          <span style="font-size: 0.82rem; font-weight: 700; color: #0066ff;" id="chk-cart-item-count">1 Item</span>
         </div>
+        <div id="chk-cart-items-preview" style="max-height: 140px; overflow-y: auto; display: flex; flex-direction: column; gap: 6px;"></div>
       </div>
     </div>
 
@@ -42,6 +52,7 @@ $defaultEmail = $_SESSION['user_email'] ?? '';
       <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
       <input type="hidden" name="sku_id" id="chk-input-sku-id" value="">
       <input type="hidden" name="product_id" id="chk-input-product-id" value="">
+      <input type="hidden" name="cart_items" id="chk-input-cart-items" value="">
 
       <div class="form-section-title">Informasi Penerima Lisensi</div>
       
