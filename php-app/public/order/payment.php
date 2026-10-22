@@ -1,0 +1,468 @@
+<?php
+
+declare(strict_types=1);
+
+require_once dirname(__DIR__, 2) . '/app/bootstrap.php';
+require_once dirname(__DIR__, 2) . '/app/helpers.php';
+
+use GeoBooster\Security\Database;
+use GeoBooster\Security\Csrf;
+
+Csrf::start();
+
+$publicId = trim((string) ($_GET['id'] ?? ''));
+
+if ($publicId === '') {
+    header('Location: /', true, 303);
+    exit;
+}
+
+try {
+    $db = Database::connect();
+    $stmt = $db->prepare('SELECT * FROM orders WHERE public_id = :id LIMIT 1');
+    $stmt->execute(['id' => $publicId]);
+    $order = $stmt->fetch();
+
+    if (!$order) {
+        http_response_code(404);
+        exit('Pesanan tidak ditemukan.');
+    }
+
+    $itemStmt = $db->prepare('SELECT * FROM order_items WHERE order_id = :order_id');
+    $itemStmt->execute(['order_id' => $order['id']]);
+    $items = $itemStmt->fetchAll();
+
+    // Check fulfillment credentials if paid
+    $fulfillment = null;
+    if ($order['status'] === 'paid' || $order['status'] === 'fulfilled') {
+        $fulStmt = $db->prepare('SELECT * FROM fulfillments WHERE order_id = :order_id LIMIT 1');
+        $fulStmt->execute(['order_id' => $order['id']]);
+        $fulfillment = $fulStmt->fetch();
+    }
+
+    $isPaid = ($order['status'] === 'paid' || $order['status'] === 'fulfilled');
+    $totalFormatted = 'Rp' . number_format((int) ($order['total_minor'] / 100), 0, ',', '.');
+    $itemName = !empty($items) ? $items[0]['sku_name_snapshot'] : 'Produk Digital ZiuLabs';
+
+} catch (Throwable $e) {
+    http_response_code(500);
+    exit('Terjadi kesalahan database: ' . htmlspecialchars($e->getMessage()));
+}
+?>
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><?= $isPaid ? 'Pesanan Berhasil' : 'Pembayaran Pesanan' ?> — <?= htmlspecialchars($order['public_id']) ?></title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/assets/style.css">
+  <style>
+    .pay-page-wrap {
+      min-height: 100vh;
+      background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.07) 0%, rgba(248, 250, 252, 1) 60%);
+      padding: 40px 20px 80px 20px;
+      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+    }
+    .pay-container {
+      max-width: 600px;
+      margin: 0 auto;
+    }
+    .pay-card {
+      background: #ffffff;
+      border: 1px solid rgba(0, 102, 255, 0.16);
+      border-radius: 24px;
+      padding: 36px 32px;
+      box-shadow: 0 16px 40px rgba(10, 25, 50, 0.07);
+    }
+    .pay-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 24px;
+      padding-bottom: 18px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    .pay-brand {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .pay-status-pill {
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+    }
+    .pay-status-pill.awaiting {
+      background: #fffbeb;
+      color: #b45309;
+      border: 1px solid #fde68a;
+    }
+    .pay-status-pill.paid {
+      background: #ecfdf5;
+      color: #047857;
+      border: 1px solid #a7f3d0;
+    }
+    .pay-amount-box {
+      background: linear-gradient(135deg, #f0f7ff, #e6f0fa);
+      border: 1px solid #c7dfff;
+      border-radius: 18px;
+      padding: 22px;
+      text-align: center;
+      margin-bottom: 26px;
+    }
+    .pay-amount-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: #0052cc;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+    .pay-amount-val {
+      font-size: 2.2rem;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.02em;
+      margin: 6px 0;
+    }
+    .pay-timer {
+      font-size: 0.88rem;
+      color: #64748b;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .pay-timer strong {
+      color: #dc2626;
+      font-family: 'JetBrains Mono', monospace;
+    }
+    .qris-box {
+      text-align: center;
+      background: #ffffff;
+      border: 2px dashed #cbd5e1;
+      border-radius: 20px;
+      padding: 26px;
+      margin-bottom: 24px;
+    }
+    .qris-qr-img {
+      width: 220px;
+      height: 220px;
+      border-radius: 12px;
+      margin: 12px auto;
+      display: block;
+      background: #f8fafc;
+      padding: 10px;
+      border: 1px solid #e2e8f0;
+    }
+    .order-details-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 20px 0;
+      font-size: 0.9rem;
+    }
+    .order-details-table td {
+      padding: 10px 0;
+      border-bottom: 1px solid #f1f5f9;
+    }
+    .order-details-table td:last-child {
+      text-align: right;
+      font-weight: 600;
+      color: #0f172a;
+    }
+    .order-details-table td:first-child {
+      color: #64748b;
+    }
+    .license-card {
+      background: #ecfdf5;
+      border: 1.5px solid #10b981;
+      border-radius: 18px;
+      padding: 24px;
+      margin: 20px 0;
+    }
+    .license-card h4 {
+      margin: 0 0 10px 0;
+      color: #065f46;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.05rem;
+    }
+    .license-credential-box {
+      background: #ffffff;
+      border: 1px solid #a7f3d0;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.92rem;
+      color: #0f172a;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 12px 0;
+    }
+    .btn-copy-code {
+      background: #0066ff;
+      color: #ffffff;
+      border: none;
+      padding: 6px 12px;
+      border-radius: 8px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-simulate-pay {
+      display: block;
+      width: 100%;
+      background: #10b981;
+      color: #ffffff;
+      padding: 14px 20px;
+      border: none;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      transition: all 0.2s ease;
+      margin: 14px 0;
+    }
+    .btn-simulate-pay:hover {
+      background: #059669;
+      transform: translateY(-1px);
+    }
+    .btn-back-home {
+      display: block;
+      text-align: center;
+      color: #0066ff;
+      font-size: 0.9rem;
+      font-weight: 600;
+      text-decoration: none;
+      margin-top: 20px;
+    }
+    /* Credential Pool Customer Card */
+    .credential-pool-wrap {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin: 14px 0;
+    }
+    .cred-card {
+      background: #ffffff;
+      border: 1px solid #a7f3d0;
+      border-radius: 16px;
+      padding: 16px 18px;
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
+      text-align: left;
+    }
+    .cred-card.cred-pending {
+      border-color: #fde68a;
+      background: #fffbeb;
+    }
+    .cred-card-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #065f46;
+      padding-bottom: 10px;
+      border-bottom: 1px dashed #d1fae5;
+      margin-bottom: 12px;
+    }
+    .cred-badge-active {
+      font-size: 0.72rem;
+      background: #d1fae5;
+      color: #047857;
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+    .cred-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .cred-label {
+      width: 90px;
+      font-size: 0.8rem;
+      font-weight: 700;
+      color: #065f46;
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .cred-val-wrap {
+      flex: 1;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 6px 12px;
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 0.88rem;
+      color: #0f172a;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .btn-cred-copy, .btn-cred-toggle {
+      background: #0f172a;
+      color: #ffffff;
+      border: none;
+      border-radius: 6px;
+      padding: 6px 10px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: all 0.15s ease;
+    }
+    .btn-cred-copy:hover {
+      background: #0066ff;
+    }
+    .btn-cred-toggle {
+      background: #e2e8f0;
+      color: #334155;
+    }
+    .btn-cred-toggle:hover {
+      background: #cbd5e1;
+    }
+    .cred-notes {
+      margin-top: 10px;
+      padding-top: 8px;
+      border-top: 1px solid #f1f5f9;
+      color: #047857;
+      font-size: 0.82rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="pay-page-wrap">
+    <div class="pay-container">
+      <div class="pay-card">
+        <div class="pay-header">
+          <div class="pay-brand">
+            <img src="/assets/logos/ziulabs-icon.webp" alt="ZiuLabs" width="32" height="32">
+            <span style="font-weight: 800; color: #0066ff;">ZiuLabs Checkout</span>
+          </div>
+          <span class="pay-status-pill <?= $isPaid ? 'paid' : 'awaiting' ?>">
+            <?= $isPaid ? 'Lunas (Terverifikasi)' : 'Menunggu Pembayaran' ?>
+          </span>
+        </div>
+
+        <?php if ($isPaid): ?>
+          <!-- SUCCESS VIEW -->
+          <div style="text-align: center; margin: 10px 0 24px 0;">
+            <div style="width: 64px; height: 64px; background: #d1fae5; color: #059669; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; font-size: 2rem; margin-bottom: 12px;">✓</div>
+            <h2 style="font-size: 1.45rem; font-weight: 800; color: #065f46; margin: 0;">Pembayaran Berhasil!</h2>
+            <p style="color: #64748b; font-size: 0.92rem; margin-top: 6px;">Terima kasih, <strong><?= htmlspecialchars($order['customer_name'] ?? 'Pelanggan') ?></strong>. Produk digital kamu sudah aktif dan siap digunakan.</p>
+          </div>
+
+          <div class="license-card">
+            <h4>
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+              <span>Akses Lisensi &amp; Kredensial Akun</span>
+            </h4>
+            <p style="font-size: 0.88rem; color: #047857; margin: 0 0 8px 0;">Salin data kredensial di bawah ini untuk aktivasi langsung:</p>
+            
+            <?= renderFulfillmentCard($fulfillment['payload_encrypted'] ?? '') ?>
+
+
+            <div style="font-size: 0.85rem; color: #065f46; line-height: 1.6; margin-top: 10px;">
+              <strong>Panduan Aktivasi:</strong>
+              <ol style="margin: 6px 0 0 18px; padding: 0;">
+                <li>Buka aplikasi/layanan resmi terkait.</li>
+                <li>Gunakan kredensial atau kode lisensi di atas untuk masuk/aktivasi.</li>
+                <li>Butuh bantuan? Tim ZiuLabs siap mendampingi via WhatsApp.</li>
+              </ol>
+            </div>
+          </div>
+
+          <table class="order-details-table">
+            <tr><td>Nomor Pesanan</td><td><?= htmlspecialchars($order['public_id']) ?></td></tr>
+            <tr><td>Produk</td><td><?= htmlspecialchars($itemName) ?></td></tr>
+            <tr><td>Total Dibayar</td><td style="color: #059669; font-weight: 800;"><?= $totalFormatted ?></td></tr>
+            <tr><td>Nomor WhatsApp</td><td><?= htmlspecialchars($order['customer_phone']) ?></td></tr>
+            <tr><td>Email</td><td><?= htmlspecialchars($order['customer_email'] ?? '-') ?></td></tr>
+          </table>
+
+          <a href="/dashboard/" class="btn-simulate-pay" style="text-align: center; text-decoration: none; display: block;">
+            Buka Riwayat di Customer Dashboard &rarr;
+          </a>
+
+        <?php else: ?>
+          <!-- AWAITING PAYMENT (QRIS) VIEW -->
+          <div class="pay-amount-box">
+            <span class="pay-amount-label">TOTAL JUMLAH YANG DIBAYAR</span>
+            <div class="pay-amount-val"><?= $totalFormatted ?></div>
+            <div class="pay-timer">
+              <span>Selesaikan pembayaran dalam</span>
+              <strong id="timer-display">14:59</strong>
+            </div>
+          </div>
+
+          <div class="qris-box">
+            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
+              <span style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">QRIS INSTAN</span>
+              <span style="background: #e0f2fe; color: #0369a1; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">VERIFIKASI OTOMATIS</span>
+            </div>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 12px 0;">Pindai QR code ini memakai m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay).</p>
+            
+            <!-- Dynamic QR Code SVG using public QR API -->
+            <img class="qris-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?= urlencode('ZIULABS-QRIS-' . $order['public_id'] . '-' . $order['total_minor']) ?>" alt="QRIS Code">
+            
+            <small style="color: #94a3b8; font-size: 0.78rem;">Kode Pesanan: <?= htmlspecialchars($order['public_id']) ?></small>
+          </div>
+
+          <!-- Sandbox Testing Simulator Button -->
+          <form method="post" action="/api/simulate-payment.php">
+            <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['public_id']) ?>">
+            <button type="submit" class="btn-simulate-pay">
+              ⚡ Simulasi Pembayaran Sukses (Uji Coba Sandbox)
+            </button>
+          </form>
+
+          <table class="order-details-table">
+            <tr><td>Nomor Pesanan</td><td><?= htmlspecialchars($order['public_id']) ?></td></tr>
+            <tr><td>Item</td><td><?= htmlspecialchars($itemName) ?></td></tr>
+            <tr><td>Pemesan</td><td><?= htmlspecialchars($order['customer_name'] ?? 'Pelanggan') ?> (<?= htmlspecialchars($order['customer_phone']) ?>)</td></tr>
+            <tr><td>Metode</td><td>QRIS Nasional (Bebas Biaya Admin)</td></tr>
+          </table>
+
+          <script>
+            // Live Polling every 3s to auto-detect payment completion
+            var orderPublicId = <?= json_encode($order['public_id']) ?>;
+            var pollInterval = setInterval(function() {
+              fetch('/api/check-payment.php?id=' + encodeURIComponent(orderPublicId))
+                .then(function(res) { return res.json(); })
+                .then(function(data) {
+                  if (data.status === 'paid' || data.status === 'fulfilled') {
+                    clearInterval(pollInterval);
+                    window.location.reload();
+                  }
+                })
+                .catch(function(err) {});
+            }, 3000);
+
+            // 15 Minutes Countdown
+            var timeLeft = 15 * 60;
+            var timerEl = document.getElementById('timer-display');
+            setInterval(function() {
+              if (timeLeft <= 0) return;
+              timeLeft--;
+              var m = Math.floor(timeLeft / 60);
+              var s = timeLeft % 60;
+              timerEl.textContent = (m < 10 ? '0' : '') + m + ':' + (s < 10 ? '0' : '') + s;
+            }, 1000);
+          </script>
+        <?php endif; ?>
+
+        <a class="btn-back-home" href="/">&larr; Kembali ke Katalog Toko</a>
+      </div>
+    </div>
+  </div>
+</body>
+</html>

@@ -17,7 +17,7 @@ function redirect(string $path): never { header('Location: ' . $path, true, 303)
 Csrf::start();
 if ((getenv('ADMIN_ENABLED') ?: '') !== 'true') {
     http_response_code(503);
-    ?><!doctype html><meta charset="utf-8"><title>Geo Booster Admin unavailable</title><style>body{font-family:system-ui;max-width:680px;margin:12vh auto;padding:24px;background:#f7f7f3;color:#17171b}main{border:1px solid #ddd;padding:28px;background:#fff}code{background:#eee;padding:3px 6px}</style><main><h1>Admin console tidak tersedia</h1><p>Set <code>ADMIN_ENABLED=true</code> pada environment untuk mengaktifkan.</p></main><?php
+    ?><!doctype html><meta charset="utf-8"><title>ZiuLabs Admin unavailable</title><style>body{font-family:system-ui;max-width:680px;margin:12vh auto;padding:24px;background:#f7f7f3;color:#17171b}main{border:1px solid #ddd;padding:28px;background:#fff}code{background:#eee;padding:3px 6px}</style><main><h1>Admin console tidak tersedia</h1><p>Set <code>ADMIN_ENABLED=true</code> pada environment untuk mengaktifkan.</p></main><?php
     exit;
 }
 try {
@@ -26,7 +26,7 @@ try {
     $userId = $auth->userId();
 } catch (Throwable $error) {
     http_response_code(503);
-    ?><!doctype html><meta charset="utf-8"><title>Geo Booster Admin unavailable</title><style>body{font-family:system-ui;max-width:680px;margin:12vh auto;padding:24px;background:#f7f7f3;color:#17171b}main{border:1px solid #ddd;padding:28px;background:#fff}code{background:#eee;padding:3px 6px}</style><main><h1>Admin console belum aktif</h1><p>Database belum terhubung pada environment ini. Konfigurasikan <code>DB_DSN</code>, jalankan migration, lalu buat owner melalui provisioning command.</p></main><?php
+    ?><!doctype html><meta charset="utf-8"><title>ZiuLabs Admin unavailable</title><style>body{font-family:system-ui;max-width:680px;margin:12vh auto;padding:24px;background:#f7f7f3;color:#17171b}main{border:1px solid #ddd;padding:28px;background:#fff}code{background:#eee;padding:3px 6px}</style><main><h1>Admin console belum aktif</h1><p>Database belum terhubung pada environment ini. Konfigurasikan <code>DB_DSN</code>, jalankan migration, lalu buat owner melalui provisioning command.</p></main><?php
     exit;
 }
 
@@ -119,12 +119,32 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
             $audit->record($userId, 'operator_note', 'order', $orderId, ['note' => $note]);
             redirect('/admin/?tab=orders');
+        } elseif ($action === 'bulk_import_credentials') {
+            $authorizer->requirePermission($userId, 'inventory.manage');
+            $skuId = filter_input(INPUT_POST, 'sku_id', FILTER_VALIDATE_INT);
+            $type = (string) ($_POST['credential_type'] ?? 'account');
+            $rawText = trim((string) ($_POST['raw_text'] ?? ''));
+            $notes = trim((string) ($_POST['notes'] ?? ''));
+            if (!$skuId || $rawText === '' || !in_array($type, ['account', 'license_key', 'invite_link', 'custom'], true)) {
+                http_response_code(422); exit('Data kredensial tidak valid.');
+            }
+            $engine = new \GeoBooster\Fulfillment\FulfillmentEngine($db);
+            $count = $engine->bulkImport($skuId, $type, $rawText, $notes ?: null);
+            $audit->record($userId, 'bulk_import_credentials', 'sku', $skuId, ['count' => $count, 'type' => $type]);
+            redirect('/admin/?tab=credentials&msg=imported_' . $count);
+        } elseif ($action === 'retry_dispatch') {
+            $authorizer->requirePermission($userId, 'orders.fulfill');
+            $orderId = filter_input(INPUT_POST, 'order_id', FILTER_VALIDATE_INT);
+            if (!$orderId) { http_response_code(422); exit('Order ID tidak valid.'); }
+            $engine = new \GeoBooster\Fulfillment\FulfillmentEngine($db);
+            $res = $engine->dispatchOrder($orderId);
+            redirect('/admin/?tab=orders&order_id=' . $orderId);
         }
     }
 }
 
 if ($userId === null) {
-    ?><!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Geo Booster Admin Login</title><link rel="stylesheet" href="/admin/style.css"></head><body class="auth-page"><main class="auth-card"><div class="eyebrow">GEO BOOSTER / INTERNAL</div><h1>Admin console</h1><p>Masuk untuk mengelola katalog dan order.</p><?php if (isset($loginError)): ?><div class="alert"><?= h($loginError) ?></div><?php endif; ?><form method="post" action="?action=login"><input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>"><label>Email<input type="email" name="email" autocomplete="username" required></label><label>Password<input type="password" name="password" autocomplete="current-password" required></label><button class="primary" type="submit">Masuk</button></form><small>Admin belum aktif sampai database dan owner account dikonfigurasi.</small></main></body></html><?php
+    ?><!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZiuLabs Admin Login</title><link rel="stylesheet" href="/admin/style.css"></head><body class="auth-page"><main class="auth-card"><div class="eyebrow">ZIULABS / INTERNAL</div><h1>Admin console</h1><p>Masuk untuk mengelola katalog dan order.</p><?php if (isset($loginError)): ?><div class="alert"><?= h($loginError) ?></div><?php endif; ?><form method="post" action="?action=login"><input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>"><label>Email<input type="email" name="email" autocomplete="username" required></label><label>Password<input type="password" name="password" autocomplete="current-password" required></label><button class="primary" type="submit">Masuk</button></form><small>Admin ZiuLabs Store.</small></main></body></html><?php
     exit;
 }
 
@@ -136,9 +156,17 @@ try {
         'products' => (int) $db->query("SELECT COUNT(*) FROM products WHERE status <> 'archived'")->fetchColumn(),
         'available' => (int) $db->query("SELECT COUNT(*) FROM skus WHERE stock_status = 'available'")->fetchColumn(),
         'orders' => (int) $db->query("SELECT COUNT(*) FROM orders WHERE status IN ('inquiry','awaiting_payment','manual_review')")->fetchColumn(),
+        'pool_available' => (int) $db->query("SELECT COUNT(*) FROM sku_credentials WHERE status = 'available'")->fetchColumn(),
         'audit' => (int) $db->query('SELECT COUNT(*) FROM audit_logs WHERE created_at >= CURRENT_DATE')->fetchColumn(),
     ];
     $products = $db->query('SELECT s.id AS sku_id, p.id AS product_id, p.name, p.category, p.description, p.compliance_status, p.status, s.label, s.price_minor, s.currency, s.stock_status FROM skus s JOIN products p ON p.id = s.product_id WHERE p.status <> "archived" ORDER BY p.name, s.id LIMIT 100')->fetchAll();
+    
+    $credentialSummary = [];
+    $recentCreds = [];
+    if ($tab === 'credentials') {
+        $credentialSummary = (new \GeoBooster\Fulfillment\FulfillmentEngine($db))->getStockSummary();
+        $recentCreds = $db->query('SELECT c.*, s.label AS sku_label, p.name AS product_name, o.public_id AS order_public_id FROM sku_credentials c JOIN skus s ON s.id = c.sku_id JOIN products p ON p.id = s.product_id LEFT JOIN orders o ON o.id = c.assigned_order_id ORDER BY c.id DESC LIMIT 50')->fetchAll();
+    }
     
     $orderFilter = $_GET['filter'] ?? 'all';
     $orderQuery = 'SELECT id, public_id, customer_name, customer_phone, status, total_minor, currency, created_at FROM orders';
@@ -176,7 +204,7 @@ try {
     http_response_code(403);
     exit('Forbidden.');
 }
-?><!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Geo Booster Admin</title><link rel="stylesheet" href="/admin/style.css"></head><body><header class="topbar"><a class="brand" href="/admin/">G<span> B</span></a><form method="post" action="?action=logout"><input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>"><button class="logout" type="submit">Keluar</button></form></header><main class="admin-shell"><div class="heading"><div><div class="eyebrow">INTERNAL / CONTROL ROOM</div><h1>Good morning, operator.</h1><p>Katalog, order, dan audit dalam satu tempat.</p></div><a class="public-link" href="/" target="_blank" rel="noopener">Lihat website ↗</a></div><nav class="tabs"><a class="<?= $tab === 'overview' ? 'active' : '' ?>" href="/admin/?tab=overview">Overview</a><a class="<?= $tab === 'products' ? 'active' : '' ?>" href="/admin/?tab=products">Products & SKU</a><a class="<?= $tab === 'orders' ? 'active' : '' ?>" href="/admin/?tab=orders">Order queue</a><a class="<?= $tab === 'audit' ? 'active' : '' ?>" href="/admin/?tab=audit">Audit log</a></nav><section class="metrics"><div><small>CATALOG</small><strong><?= $counts['products'] ?></strong><span>published records</span></div><div><small>INVENTORY</small><strong><?= $counts['available'] ?></strong><span>SKU tersedia</span></div><div><small>ATTENTION</small><strong><?= $counts['orders'] ?></strong><span>order perlu action</span></div><div><small>TODAY</small><strong><?= $counts['audit'] ?></strong><span>audit events</span></div></section><?php if ($tab === 'products'): ?><section class="panel"><div class="panel-head"><div><div class="eyebrow">CATALOG / SKU</div><h2>Inventory control</h2></div><span class="muted">Harga tersimpan sebagai integer minor unit.</span></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Label</th><th>Price</th><th>Status</th><th>Action</th></tr></thead><tbody><?php foreach ($products as $product): ?><tr>
+?><!doctype html><html lang="id"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>ZiuLabs Admin</title><link rel="stylesheet" href="/admin/style.css"></head><body><header class="topbar"><a class="brand" href="/admin/">Z<span> L</span></a><form method="post" action="?action=logout"><input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>"><button class="logout" type="submit">Keluar</button></form></header><main class="admin-shell"><div class="heading"><div><div class="eyebrow">ZIULABS / CONTROL ROOM</div><h1>Good morning, operator.</h1><p>Katalog, order, dan audit dalam satu tempat.</p></div><a class="public-link" href="/" target="_blank" rel="noopener">Lihat website ↗</a></div><nav class="tabs"><a class="<?= $tab === 'overview' ? 'active' : '' ?>" href="/admin/?tab=overview">Overview</a><a class="<?= $tab === 'products' ? 'active' : '' ?>" href="/admin/?tab=products">Products & SKU</a><a class="<?= $tab === 'credentials' ? 'active' : '' ?>" href="/admin/?tab=credentials">Credential Pool</a><a class="<?= $tab === 'orders' ? 'active' : '' ?>" href="/admin/?tab=orders">Order queue</a><a class="<?= $tab === 'audit' ? 'active' : '' ?>" href="/admin/?tab=audit">Audit log</a></nav><section class="metrics"><div><small>CATALOG</small><strong><?= $counts['products'] ?></strong><span>published records</span></div><div><small>INVENTORY</small><strong><?= $counts['available'] ?></strong><span>SKU tersedia</span></div><div><small>CREDENTIAL POOL</small><strong><?= $counts['pool_available'] ?></strong><span>stok siap kirim</span></div><div><small>ATTENTION</small><strong><?= $counts['orders'] ?></strong><span>order perlu action</span></div></section><?php if ($tab === 'products'): ?><section class="panel"><div class="panel-head"><div><div class="eyebrow">CATALOG / SKU</div><h2>Inventory control</h2></div><span class="muted">Harga tersimpan sebagai integer minor unit.</span></div><div class="table-wrap"><table><thead><tr><th>Product</th><th>Label</th><th>Price</th><th>Status</th><th>Action</th></tr></thead><tbody><?php foreach ($products as $product): ?><tr>
 <td>
     <form class="inline-form" method="post" action="?action=edit_product" style="display:flex;gap:4px">
         <input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>">
@@ -212,7 +240,29 @@ try {
         <button type="submit">Simpan</button>
     </form>
 </td>
-</tr><?php endforeach; ?></tbody></table></div></section><?php elseif ($tab === 'orders'): ?><section class="panel"><div class="panel-head"><div><div class="eyebrow">OPERATIONS / ORDERS</div><h2>Order queue</h2></div>
+</tr><?php endforeach; ?></tbody></table></div></section><?php elseif ($tab === 'credentials'): ?><section class="panel"><div class="panel-head"><div><div class="eyebrow">FULFILLMENT / INVENTORY</div><h2>Credential Pool Management</h2></div><span class="muted">Stok akun dan lisensi instan untuk pengiriman otomatis saat QRIS terbayar.</span></div>
+<div style="background:#f8fafc;border:1px solid var(--line);border-radius:8px;padding:20px;margin-bottom:24px">
+<h3 style="font-size:15px;font-weight:700;margin:0 0 8px 0">+ Impor Massal Kredensial ke Pool</h3>
+<p style="font-size:12px;color:var(--muted);margin:0 0 14px 0">Akun: <code>email:password</code> per baris. Lisensi / Invite: satu token/link per baris.</p>
+<form method="post" action="?action=bulk_import_credentials">
+<input type="hidden" name="_csrf" value="<?= h(Csrf::token()) ?>">
+<div style="display:grid;grid-template-columns:2fr 1fr;gap:12px;margin-bottom:10px">
+<div><label style="margin:0 0 4px;font-size:11px">Pilih SKU Produk Target</label><select name="sku_id" required style="width:100%;padding:8px;border:1px solid var(--line);border-radius:4px"><?php foreach ($products as $p): ?><option value="<?= h($p['sku_id']) ?>"><?= h($p['name']) ?> [<?= h($p['label']) ?>]</option><?php endforeach; ?></select></div>
+<div><label style="margin:0 0 4px;font-size:11px">Tipe Kredensial</label><select name="credential_type" required style="width:100%;padding:8px;border:1px solid var(--line);border-radius:4px"><option value="account">Akun (Email &amp; Password)</option><option value="license_key">Kode Lisensi / Serial</option><option value="invite_link">Link Undangan / Invite</option></select></div>
+</div>
+<div style="margin-bottom:10px"><label style="margin:0 0 4px;font-size:11px">Daftar Data Kredensial (Satu per baris)</label><textarea name="raw_text" required rows="4" placeholder="user1@example.com:Password123&#10;user2@example.com:Password456" style="width:100%;padding:10px;border:1px solid var(--line);border-radius:4px;font-family:monospace;font-size:12px"></textarea></div>
+<div style="display:flex;gap:10px;align-items:flex-end"><div style="flex:1"><label style="margin:0 0 4px;font-size:11px">Catatan Garansi / Panduan (Opsional)</label><input type="text" name="notes" placeholder="Contoh: Garansi 30 Hari via CS ZiuLabs." style="width:100%;padding:8px;border:1px solid var(--line);border-radius:4px;font-size:12px"></div><button type="submit" class="button light" style="margin-top:0;padding:10px 18px">+ Masukkan ke Pool</button></div>
+</form>
+</div>
+<h3 style="font-size:15px;font-weight:700;margin:24px 0 12px 0">Status Stok Pool per SKU</h3>
+<div class="table-wrap"><table><thead><tr><th>Produk &amp; Paket</th><th>Tersedia (Siap Kirim)</th><th>Terjual</th><th>Total Pool</th><th>Status SKU</th></tr></thead><tbody>
+<?php foreach ($credentialSummary as $cs): ?><tr><td><strong><?= h($cs['product_name']) ?></strong> <span class="muted">[<?= h($cs['sku_label']) ?>]</span></td><td><span class="status <?= $cs['available_count'] > 0 ? 'available' : 'sold_out' ?>"><?= (int) $cs['available_count'] ?> unit</span></td><td><?= (int) $cs['assigned_count'] ?> unit</td><td><?= (int) $cs['total_pool'] ?> unit</td><td><span class="status <?= h($cs['stock_status']) ?>"><?= h($cs['stock_status']) ?></span></td></tr><?php endforeach; ?>
+</tbody></table></div>
+<h3 style="font-size:15px;font-weight:700;margin:32px 0 12px 0">Riwayat Kredensial Terbaru</h3>
+<div class="table-wrap"><table><thead><tr><th>ID</th><th>Produk</th><th>Tipe</th><th>Detail Kredensial</th><th>Order</th><th>Status</th><th>Waktu</th></tr></thead><tbody>
+<?php foreach ($recentCreds as $rc): ?><tr><td>#<?= h($rc['id']) ?></td><td><?= h($rc['product_name']) ?> <small class="muted">[<?= h($rc['sku_label']) ?>]</small></td><td><code><?= h($rc['credential_type']) ?></code></td><td><?php if (!empty($rc['account_email'])): ?><code><?= h($rc['account_email']) ?></code> (Pass: •••••)<?php elseif (!empty($rc['license_key'])): ?><code><?= h(substr($rc['license_key'], 0, 24)) ?>...</code><?php elseif (!empty($rc['invite_url'])): ?><a href="<?= h($rc['invite_url']) ?>" target="_blank" rel="noopener">Link Undangan ↗</a><?php endif; ?></td><td><?php if (!empty($rc['order_public_id'])): ?><a href="?tab=orders&order_id=<?= h($rc['assigned_order_id']) ?>"><strong><?= h($rc['order_public_id']) ?></strong></a><?php else: ?><span class="muted">-</span><?php endif; ?></td><td><span class="status <?= $rc['status'] === 'available' ? 'available' : 'paid' ?>"><?= h($rc['status']) ?></span></td><td><?= h($rc['assigned_at'] ?: $rc['created_at']) ?></td></tr><?php endforeach; ?>
+</tbody></table></div>
+</section><?php elseif ($tab === 'orders'): ?><section class="panel"><div class="panel-head"><div><div class="eyebrow">OPERATIONS / ORDERS</div><h2>Order queue</h2></div>
 <form method="get" action="/admin/"><input type="hidden" name="tab" value="orders"><select name="filter" onchange="this.form.submit()"><option value="all">All Status</option><option value="inquiry" <?= ($orderFilter ?? '') === 'inquiry' ? 'selected' : '' ?>>Inquiry</option><option value="awaiting_payment" <?= ($orderFilter ?? '') === 'awaiting_payment' ? 'selected' : '' ?>>Awaiting Payment</option><option value="manual_review" <?= ($orderFilter ?? '') === 'manual_review' ? 'selected' : '' ?>>Manual Review</option></select></form>
 </div>
 <?php if (!empty($orderItems)): ?>
