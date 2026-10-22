@@ -54,39 +54,25 @@ require __DIR__ . '/../../views/components/navbar.php';
           Pilih Produk &amp; <span class="text-gemini">Akses Pilihanmu.</span>
         </h1>
         <p class="store-catalog-subtitle">
-          Katalog lengkap lisensi dan akses digital resmi ZiuLabs. Hanya <strong>Gemini Pro 18 Months</strong> yang saat ini tersedia dan siap dibeli langsung melalui QRIS otomatis. Produk lainnya berstatus habis (<strong>Rp XXX</strong>) dan belum diinput harganya.
+          Temukan katalog pilihan software premium, tool kecerdasan buatan (AI), dan akun digital resmi untuk memaksimalkan produktivitas, kreativitas, dan performa kerja Anda.
         </p>
       </div>
 
       <div class="store-header-stats">
-        <div class="store-stat-box is-avail">
+        <div class="store-stat-box">
           <div class="stat-dot pulse-green"></div>
           <div class="stat-info">
-            <span class="stat-num"><?= $availableCount ?></span>
-            <span class="stat-lbl">Tersedia Beli Langsung</span>
+            <span class="stat-num"><?= count($products) ?> SKU</span>
+            <span class="stat-lbl">Produk Digital Pilihan</span>
           </div>
         </div>
-        <div class="store-stat-box is-waiting">
-          <div class="stat-dot neutral-gray"></div>
+        <div class="store-stat-box">
+          <div class="stat-dot" style="width: 10px; height: 10px; border-radius: 50%; background: #0066ff;"></div>
           <div class="stat-info">
-            <span class="stat-num"><?= $soldOutCount ?></span>
-            <span class="stat-lbl">Menunggu Restok (Rp XXX)</span>
+            <span class="stat-num">100%</span>
+            <span class="stat-lbl">Garansi &amp; Akses Resmi</span>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Notice Banner -->
-    <div class="store-notice-banner">
-      <div class="notice-icon">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2">
-          <circle cx="12" cy="12" r="10"></circle>
-          <line x1="12" y1="8" x2="12" y2="12"></line>
-          <line x1="12" y1="16" x2="12.01" y2="16"></line>
-        </svg>
-      </div>
-      <div class="notice-text">
-        <strong>Status Stok &amp; Harga:</strong> Saat ini stok siap beli instan adalah <strong>Gemini Pro 18 Months (Rp50.000 — Diskon 50%)</strong>. Untuk produk lain berstatus <em>Habis (Rp XXX)</em>, harga resmi belum ditentukan. Anda dapat menghubungi admin via WhatsApp untuk menanyakan estimasi ketersediaan.
       </div>
     </div>
 

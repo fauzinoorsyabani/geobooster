@@ -77,9 +77,9 @@ declare(strict_types=1);
       </div>
 
       <div class="cart-trust-notes">
-        <span>🔒 QRIS Otomatis</span>
-        <span>⚡ Pengiriman Instan</span>
-        <span>🛡️ Garansi 30 Hari</span>
+        <span>QRIS Otomatis</span>
+        <span>Pengiriman Instan</span>
+        <span>Garansi 30 Hari</span>
       </div>
     </div>
   </div>

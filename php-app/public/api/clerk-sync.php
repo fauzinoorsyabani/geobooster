@@ -63,6 +63,7 @@ try {
     }
 
     session_regenerate_id(true);
+    Csrf::start();
     $_SESSION['user_id'] = $userId;
     $_SESSION['user_name'] = $name;
     $_SESSION['user_email'] = $email;
@@ -76,6 +77,7 @@ try {
         'user_id' => $userId,
         'name' => $name,
         'email' => $email,
+        'csrf_token' => Csrf::token(),
     ]);
     exit;
 

@@ -14,6 +14,7 @@ declare(strict_types=1);
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title><?= e($app['name']) ?> — Solusi Lengkap Produk Digital &amp; AI</title>
   <meta name="description" content="<?= e($app['name']) ?> — Platform resmi katalog produk digital premium dan tools AI terverifikasi dengan aktivasi cepat via WhatsApp." />
+  <meta name="csrf-token" content="<?= e(\GeoBooster\Security\Csrf::token()) ?>" />
 
   <!-- Typography -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />

@@ -15,7 +15,7 @@ declare(strict_types=1);
     </a>
 
     <nav class="nav-links" aria-label="Navigasi Utama">
-      <a href="/catalog/">Katalog</a>
+      <a href="/#catalog">Katalog</a>
       <a href="/#process">Cara Kerja</a>
       <a href="/#faq">FAQ</a>
     </nav>

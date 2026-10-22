@@ -20,7 +20,7 @@ try {
     Csrf::start();
     
     // Verify CSRF token
-    $token = $_POST['_csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? null);
+    $token = $_POST['_csrf'] ?? ($_SERVER['HTTP_X_CSRF_TOKEN'] ?? ($_COOKIE['csrf_token'] ?? null));
     Csrf::verify(is_string($token) ? $token : null);
 
     $db = Database::connect();

@@ -49,7 +49,7 @@ $defaultEmail = $_SESSION['user_email'] ?? '';
 
     <!-- Checkout Form -->
     <form id="checkout-form" class="checkout-form" method="post" action="/api/checkout.php">
-      <input type="hidden" name="_csrf" value="<?= e($csrfToken) ?>">
+      <input type="hidden" name="_csrf" id="chk-input-csrf" value="<?= e($csrfToken) ?>">
       <input type="hidden" name="sku_id" id="chk-input-sku-id" value="">
       <input type="hidden" name="product_id" id="chk-input-product-id" value="">
       <input type="hidden" name="cart_items" id="chk-input-cart-items" value="">

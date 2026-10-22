@@ -30,14 +30,42 @@ final class Csrf
     public static function start(): void
     {
         if (session_status() === PHP_SESSION_NONE) {
+            $isProduction = (getenv('APP_ENV') ?: 'local') === 'production';
             session_set_cookie_params([
+                'lifetime' => 0,
+                'path' => '/',
+                'domain' => '',
+                'secure' => $isProduction,
                 'httponly' => true,
-                'secure' => (getenv('APP_ENV') ?: 'local') === 'production',
                 'samesite' => 'Lax',
             ]);
             session_start();
         }
-        $_SESSION['_csrf'] ??= bin2hex(random_bytes(32));
+        
+        if (empty($_SESSION['_csrf']) || !is_string($_SESSION['_csrf'])) {
+            // Adopt existing valid cookie token if session was newly created or restarted
+            if (!empty($_COOKIE['csrf_token']) && is_string($_COOKIE['csrf_token']) && strlen($_COOKIE['csrf_token']) === 64) {
+                $_SESSION['_csrf'] = $_COOKIE['csrf_token'];
+            } else {
+                $_SESSION['_csrf'] = bin2hex(random_bytes(32));
+            }
+        }
+
+        // Sync CSRF token cookie with path=/ so AJAX and fetch can always access and send it
+        $isProduction = (getenv('APP_ENV') ?: 'local') === 'production';
+        if (empty($_COOKIE['csrf_token']) || $_COOKIE['csrf_token'] !== $_SESSION['_csrf']) {
+            if (!headers_sent()) {
+                setcookie('csrf_token', $_SESSION['_csrf'], [
+                    'expires' => 0,
+                    'path' => '/',
+                    'domain' => '',
+                    'secure' => $isProduction,
+                    'httponly' => false,
+                    'samesite' => 'Lax',
+                ]);
+            }
+            $_COOKIE['csrf_token'] = $_SESSION['_csrf'];
+        }
     }
 
     public static function token(): string
@@ -48,11 +76,23 @@ final class Csrf
 
     public static function verify(?string $token): void
     {
+        $rawCookieToken = $_COOKIE['csrf_token'] ?? null;
         self::start();
-        if (!is_string($token) || !hash_equals($_SESSION['_csrf'], $token)) {
-            http_response_code(419);
-            throw new RuntimeException('Invalid CSRF token.');
+        $sessionToken = $_SESSION['_csrf'] ?? null;
+        $cookieToken = is_string($rawCookieToken) ? $rawCookieToken : ($_COOKIE['csrf_token'] ?? null);
+
+        if (is_string($token) && $token !== '') {
+            if (is_string($sessionToken) && hash_equals($sessionToken, $token)) {
+                return;
+            }
+            if (is_string($cookieToken) && hash_equals($cookieToken, $token)) {
+                $_SESSION['_csrf'] = $token;
+                return;
+            }
         }
+
+        http_response_code(419);
+        throw new RuntimeException('Invalid CSRF token.');
     }
 }
 

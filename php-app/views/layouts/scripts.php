@@ -519,6 +519,18 @@ declare(strict_types=1);
         chkAlert.style.display = 'none';
         chkAlert.textContent = '';
       }
+      // Ensure CSRF token is fresh
+      var metaCsrf = document.querySelector('meta[name="csrf-token"]');
+      var cookieCsrf = (function() {
+        var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+        return m ? decodeURIComponent(m[1]) : '';
+      })();
+      var freshCsrf = (metaCsrf && metaCsrf.content) || cookieCsrf;
+      var csrfInp = document.getElementById('chk-input-csrf');
+      if (freshCsrf && csrfInp && (!csrfInp.value || csrfInp.value.trim() === '')) {
+        csrfInp.value = freshCsrf;
+      }
+
       checkoutModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
@@ -561,6 +573,18 @@ declare(strict_types=1);
         chkAlert.style.display = 'none';
         chkAlert.textContent = '';
       }
+      // Ensure CSRF token is fresh
+      var metaCsrf = document.querySelector('meta[name="csrf-token"]');
+      var cookieCsrf = (function() {
+        var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+        return m ? decodeURIComponent(m[1]) : '';
+      })();
+      var freshCsrf = (metaCsrf && metaCsrf.content) || cookieCsrf;
+      var csrfInp = document.getElementById('chk-input-csrf');
+      if (freshCsrf && csrfInp && (!csrfInp.value || csrfInp.value.trim() === '')) {
+        csrfInp.value = freshCsrf;
+      }
+
       checkoutModal.classList.add('is-open');
       document.body.style.overflow = 'hidden';
     }
@@ -616,9 +640,24 @@ declare(strict_types=1);
         if (btnSpinner) btnSpinner.style.display = 'inline';
 
         var formData = new FormData(checkoutForm);
+        
+        // Ensure CSRF token is synchronized from cookie or input and sent in headers
+        var cookieCsrf = (function() {
+          var m = document.cookie.match(/(?:^|;\s*)csrf_token=([^;]+)/);
+          return m ? decodeURIComponent(m[1]) : '';
+        })();
+        var formCsrf = formData.get('_csrf') || '';
+        var finalCsrf = formCsrf || cookieCsrf;
+        if (finalCsrf) {
+          formData.set('_csrf', finalCsrf);
+        }
 
         fetch('/api/checkout.php', {
           method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'X-CSRF-TOKEN': finalCsrf
+          },
           body: formData
         })
         .then(function(res) {
@@ -670,7 +709,16 @@ declare(strict_types=1);
           name: name,
           avatar: avatar
         })
-      }).catch(function(e) {});
+      })
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+        if (data && data.csrf_token) {
+          document.querySelectorAll('input[name="_csrf"]').forEach(function(inp) {
+            inp.value = data.csrf_token;
+          });
+        }
+      })
+      .catch(function(e) {});
     }
 
     function renderClerkState(user) {

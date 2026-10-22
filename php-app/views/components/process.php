@@ -11,10 +11,18 @@ declare(strict_types=1);
     <div class="process-band-inner">
       <div class="section-head process-heading">
         <div>
-          <p class="section-eyebrow">ALUR PEMESANAN</p>
-          <h2 class="section-title">Proses Mudah, Transparan &amp; Cepat</h2>
+          <a href="/cara-kerja/" class="catalog-heading-link" title="Buka Panduan Lengkap Cara Kerja">
+            <p class="section-eyebrow">ALUR PEMESANAN <span style="font-size:11px; font-weight:700; opacity:0.9; margin-left:4px;">↗</span></p>
+            <h2 class="section-title">Proses Mudah, Transparan &amp; Cepat</h2>
+          </a>
         </div>
-        <p class="section-desc">Pilih produk yang kamu butuhkan, klik untuk chat WhatsApp, dan tim ZiuLabs akan langsung memproses pesananmu.</p>
+        <div class="section-head-actions">
+          <p class="section-desc">Pilih produk yang kamu butuhkan, lakukan pemesanan instan QRIS otomatis atau konsultasi via WhatsApp, dan sistem akan langsung memproses pesananmu.</p>
+          <a href="/cara-kerja/" class="btn-catalog-standalone-jump" title="Buka Halaman Lengkap Cara Kerja">
+            <span>Pelajari Alur Lengkap</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+          </a>
+        </div>
       </div>
 
       <div class="process-grid">
