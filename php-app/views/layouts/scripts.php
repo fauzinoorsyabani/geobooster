@@ -13,7 +13,8 @@ declare(strict_types=1);
   (function() {
     var products = <?= json_encode($products, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) ?>;
     var waNumber = '<?= preg_replace('/[^0-9]/', '', $app['whatsapp_number']) ?>';
-    var pageSize = 6;
+    var isCatalogPage = document.body.classList.contains('page-catalog');
+    var pageSize = isCatalogPage ? 12 : 6;
     var currentPage = 1;
     var currentFilter = 'all';
     var searchQuery = '';

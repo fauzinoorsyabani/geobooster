@@ -71,9 +71,9 @@ declare(strict_types=1);
           <span>Pesan Sekarang — Raih Manfaatnya</span>
         </a>
 
-        <a class="btn-hero-catalog" href="#catalog">
-          <span>Lihat Katalog (<?= count($products) ?> SKU)</span>
-          <span class="arrow-down">↓</span>
+        <a class="btn-hero-catalog" href="/catalog/">
+          <span>Buka Katalog Digital (<?= count($products) ?> SKU)</span>
+          <span class="arrow-down">→</span>
         </a>
       </div>
     </div>

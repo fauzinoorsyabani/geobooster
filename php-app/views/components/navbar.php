@@ -9,15 +9,15 @@ declare(strict_types=1);
 ?>
 <header class="topbar">
   <div class="topbar-inner">
-    <a class="brand" href="#top" aria-label="<?= e($app['name']) ?> Home">
+    <a class="brand" href="/" aria-label="<?= e($app['name']) ?> Home">
       <img src="/assets/logos/ziulabs-icon.webp" alt="Z" class="brand-logo-img" width="34" height="34" />
       <span class="brand-tag">STORE</span>
     </a>
 
     <nav class="nav-links" aria-label="Navigasi Utama">
-      <a href="#catalog">Katalog</a>
-      <a href="#process">Cara Kerja</a>
-      <a href="#faq">FAQ</a>
+      <a href="/catalog/">Katalog</a>
+      <a href="/#process">Cara Kerja</a>
+      <a href="/#faq">FAQ</a>
     </nav>
 
     <div class="topbar-actions">

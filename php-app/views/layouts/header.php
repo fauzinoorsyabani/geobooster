@@ -33,7 +33,7 @@ declare(strict_types=1);
   </script>
 </head>
 
-<body>
+<body class="<?= e($bodyClass ?? '') ?>">
 
   <!-- Background Ambient Glow & Web3 Grid (100% GPU, Zero Lag) -->
   <div class="ambient-scene" aria-hidden="true">

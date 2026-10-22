@@ -12,12 +12,20 @@ declare(strict_types=1);
   <div class="shell">
     <div class="section-head">
       <div>
-        <p class="section-eyebrow">KATALOG DIGITAL</p>
-        <h2 class="section-title">Pilih Produk &amp; <span class="text-gemini">Akses Pilihanmu.</span></h2>
+        <a href="/catalog/" class="catalog-heading-link" title="Buka Halaman Katalog Lengkap">
+          <p class="section-eyebrow">KATALOG DIGITAL <span style="font-size:11px; font-weight:700; opacity:0.9; margin-left:4px;">↗</span></p>
+          <h2 class="section-title">Pilih Produk &amp; <span class="text-gemini">Akses Pilihanmu.</span></h2>
+        </a>
       </div>
-      <p class="section-desc">
-        <?= count($products) ?> SKU siap pakai. Filter kategori untuk menemukan produk yang kamu butuhkan atau klik langsung untuk order cepat via WhatsApp / Beli Langsung.
-      </p>
+      <div class="section-head-actions">
+        <p class="section-desc">
+          <?= count($products) ?> SKU terdaftar. Filter kategori untuk menemukan produk yang kamu butuhkan atau klik langsung untuk order cepat via WhatsApp / Beli Langsung.
+        </p>
+        <a href="/catalog/" class="btn-catalog-standalone-jump" title="Buka Halaman Katalog Lengkap">
+          <span>Buka Halaman Katalog</span>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+      </div>
     </div>
 
     <!-- Filter Controls -->
