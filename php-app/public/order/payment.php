@@ -158,21 +158,46 @@ try {
     }
     .qris-box {
       text-align: center;
-      background: #ffffff;
-      border: 2px dashed #cbd5e1;
-      border-radius: 20px;
-      padding: 26px;
+      background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.05) 0%, #ffffff 80%);
+      border: 1.5px solid rgba(0, 102, 255, 0.22);
+      border-radius: 24px;
+      padding: 24px 20px;
       margin-bottom: 24px;
+      box-shadow: 0 10px 30px rgba(0, 102, 255, 0.06);
     }
-    .qris-qr-img {
-      width: 220px;
-      height: 220px;
-      border-radius: 12px;
-      margin: 12px auto;
+    .qris-banner-img {
+      width: 100%;
+      max-width: 310px;
+      height: auto;
+      border-radius: 20px;
+      margin: 12px auto 14px auto;
       display: block;
-      background: #f8fafc;
-      padding: 10px;
-      border: 1px solid #e2e8f0;
+      box-shadow: 0 12px 32px rgba(0, 102, 255, 0.16);
+      border: 1px solid rgba(0, 102, 255, 0.2);
+      transition: transform 0.2s ease;
+    }
+    .qris-banner-img:hover {
+      transform: scale(1.02);
+    }
+    .qris-download-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      background: #f0f7ff;
+      border: 1px solid #bfdbfe;
+      color: #0284c7;
+      font-size: 0.8rem;
+      font-weight: 700;
+      padding: 6px 14px;
+      border-radius: 999px;
+      text-decoration: none;
+      margin-bottom: 8px;
+      transition: all 0.15s ease;
+    }
+    .qris-download-btn:hover {
+      background: #e0f2fe;
+      color: #0369a1;
+      border-color: #93c5fd;
     }
     .order-details-table {
       width: 100%;
@@ -429,15 +454,25 @@ try {
 
           <div class="qris-box">
             <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
-              <span style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">QRIS INSTAN</span>
-              <span style="background: #e0f2fe; color: #0369a1; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px;">VERIFIKASI OTOMATIS</span>
+              <span style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">QRIS RESMI ZIULABS</span>
+              <span style="background: #ecfdf5; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">SCAN &amp; BAYAR</span>
             </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 12px 0;">Pindai QR code ini memakai m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay).</p>
+            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 12px 0;">Buka m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay), lalu scan kode QR resmi di bawah ini:</p>
             
-            <!-- Dynamic QR Code SVG using public QR API -->
-            <img class="qris-qr-img" src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=<?= urlencode('ZIULABS-QRIS-' . $order['public_id'] . '-' . $order['total_minor']) ?>" alt="QRIS Code">
+            <a href="/assets/qris-ziulabs.png" target="_blank" title="Klik untuk memperbesar gambar QR">
+              <img class="qris-banner-img" src="/assets/qris-ziulabs.png" alt="QRIS Resmi ZiuLabs">
+            </a>
+
+            <div>
+              <a href="/assets/qris-ziulabs.png" download="QRIS-ZiuLabs-<?= htmlspecialchars($order['public_id']) ?>.png" class="qris-download-btn">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                Unduh / Simpan Gambar QR
+              </a>
+            </div>
             
-            <small style="color: #94a3b8; font-size: 0.78rem;">Kode Pesanan: <?= htmlspecialchars($order['public_id']) ?></small>
+            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-top: 10px; font-size: 0.84rem; color: #475569;">
+              Pastikan nominal pembayaran sesuai: <strong style="color: #0066ff;"><?= $totalFormatted ?></strong>
+            </div>
           </div>
 
           <!-- Sandbox Testing Simulator Button -->
