@@ -573,6 +573,15 @@ declare(strict_types=1);
       var addCartBtn = e.target.closest('.js-add-to-cart');
       if (addCartBtn) {
         e.preventDefault();
+        var isAuth = (typeof Clerk !== 'undefined' && Clerk.user) || <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
+        if (!isAuth) {
+          if (typeof Clerk !== 'undefined') {
+            Clerk.openSignIn();
+          } else {
+            window.location.href = '/auth/login.php';
+          }
+          return;
+        }
         ZiuCart.add(addCartBtn.dataset);
         return;
       }
@@ -815,6 +824,7 @@ declare(strict_types=1);
       if (user) {
         if (btnClerkSignIn) btnClerkSignIn.style.display = 'none';
         if (btnHeaderDash) btnHeaderDash.style.display = 'inline-flex';
+        if (cartNavBtn) cartNavBtn.style.display = 'inline-flex';
         if (clerkUserButtonMount) {
           clerkUserButtonMount.style.display = 'inline-flex';
           clerkUserButtonMount.innerHTML = '';
@@ -844,6 +854,10 @@ declare(strict_types=1);
         }
         if (clerkUserButtonMount) clerkUserButtonMount.style.display = 'none';
         if (btnHeaderDash) btnHeaderDash.style.display = 'none';
+        var hasPhpSession = <?= isset($_SESSION['user_id']) ? 'true' : 'false' ?>;
+        if (!hasPhpSession && cartNavBtn) {
+          cartNavBtn.style.display = 'none';
+        }
       }
     }
 

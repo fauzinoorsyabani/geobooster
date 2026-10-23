@@ -30,8 +30,9 @@ declare(strict_types=1);
         <kbd>⌘K</kbd>
       </button>
 
-      <!-- Cart Drawer Trigger Button (Icon Only) -->
-      <button class="cart-trigger-btn" id="cart-nav-btn" type="button" aria-label="Buka Keranjang Belanja" title="Lihat Keranjang Belanja">
+      <!-- Cart Drawer Trigger Button (Only Visible when User Logs In) -->
+      <?php $isLoggedIn = isset($_SESSION['user_id']); ?>
+      <button class="cart-trigger-btn" id="cart-nav-btn" type="button" aria-label="Buka Keranjang Belanja" title="Lihat Keranjang Belanja" style="display: <?= $isLoggedIn ? 'inline-flex' : 'none' ?>;">
         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
           <circle cx="9" cy="21" r="1"></circle>
           <circle cx="20" cy="21" r="1"></circle>
