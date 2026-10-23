@@ -2615,22 +2615,23 @@ input { font-family: inherit; }
   flex-wrap: wrap;
 }
 
-/* ─── Cart Trigger Button in Navbar ─── */
+/* ─── Cart Trigger Button in Navbar (Icon Only) ─── */
 .cart-trigger-btn {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  background: rgba(255, 255, 255, 0.9);
-  border: 1px solid rgba(0, 102, 255, 0.2);
-  border-radius: 999px;
-  padding: 6px 14px;
-  font-family: inherit;
-  font-size: 0.85rem;
-  font-weight: 600;
+  justify-content: center;
+  position: relative;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  background: #ffffff;
+  border: 1px solid var(--border-rule, #e2e8f0);
+  border-radius: var(--radius-pill, 999px);
   color: #0f172a;
   cursor: pointer;
   transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  flex-shrink: 0;
 }
 .cart-trigger-btn:hover {
   background: #f0f7ff;
@@ -2640,17 +2641,31 @@ input { font-family: inherit; }
 }
 .cart-trigger-btn svg {
   color: #0066ff;
+  width: 18px;
+  height: 18px;
+  transition: transform 0.2s ease;
+}
+.cart-trigger-btn:hover svg {
+  transform: scale(1.08);
 }
 .cart-badge-count {
+  position: absolute;
+  top: -4px;
+  right: -5px;
   background: #0066ff;
   color: #ffffff;
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 800;
-  padding: 2px 7px;
+  min-width: 17px;
+  height: 17px;
+  padding: 0 4px;
   border-radius: 999px;
-  min-width: 18px;
+  box-sizing: border-box;
   text-align: center;
-  line-height: 1;
+  line-height: 17px;
+  border: 2px solid #ffffff;
+  box-shadow: 0 2px 4px rgba(0, 102, 255, 0.28);
+  pointer-events: none;
 }
 
 /* ─── Catalog Price Discount & Cart Button ─── */
