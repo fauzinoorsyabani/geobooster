@@ -480,7 +480,7 @@ input { font-family: inherit; }
   align-self: flex-start;
   padding: 6px 14px;
   background: #ffffff;
-  border: 1px solid var(--blue-subtle);
+  border: none;
   border-radius: var(--radius-pill);
   font-size: 12px;
   font-weight: 700;
@@ -644,24 +644,27 @@ input { font-family: inherit; }
   100% { transform: translate3d(0, 0, 0) rotate(0deg); }
 }
 
-/* Web3 Dynamic Rotating Text Badge with Glassmorphic Tech Background */
+/* Web3 Dynamic Rotating Text Badge with Glassmorphic Tech Background (Square, No Border) */
 .rotator-badge {
   display: inline-flex;
   align-items: center;
   position: relative;
   background: linear-gradient(135deg, rgba(0, 102, 255, 0.08) 0%, rgba(0, 102, 255, 0.15) 100%);
-  border: 1px solid rgba(0, 102, 255, 0.28);
-  border-radius: 8px;
-  padding: 3px 14px;
+  border: none;
+  border-radius: 0;
+  padding: 3px 12px;
   margin-top: 6px;
   color: var(--blue-ziulabs);
-  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.10);
   backdrop-filter: blur(8px);
   -webkit-backdrop-filter: blur(8px);
   min-height: 1.3em;
   max-width: 100%;
   overflow: hidden;
   vertical-align: middle;
+  font-size: clamp(18px, 2.4vw, 32px);
+  line-height: 1.2;
+  white-space: nowrap;
 }
 
 .rotator-badge::before {
@@ -688,6 +691,7 @@ input { font-family: inherit; }
   letter-spacing: -0.01em;
   position: relative;
   z-index: 2;
+  white-space: nowrap;
 }
 
 .rotator-cursor {
@@ -704,6 +708,14 @@ input { font-family: inherit; }
 @keyframes cursorBlink {
   0%, 45% { opacity: 1; }
   50%, 100% { opacity: 0; }
+}
+
+@media (max-width: 640px) {
+  .rotator-badge {
+    font-size: clamp(14px, 4.2vw, 20px);
+    padding: 2px 8px;
+    margin-top: 4px;
+  }
 }
 
 .hero-lead {
