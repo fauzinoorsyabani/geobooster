@@ -240,7 +240,6 @@ declare(strict_types=1);
 
       var isHovered = false;
       var customAudio = null;
-      var hasCustomAudio = false;
 
       // Preload custom audio from /assets/audio/mascot-voice.mp3
       try {
