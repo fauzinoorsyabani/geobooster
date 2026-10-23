@@ -171,44 +171,87 @@ declare(strict_types=1);
       }
     });
 
-    // ─── Web3 Headline Text Rotator (Smooth Typewriter) ───
-    (function initRotator() {
-      var el = document.getElementById('hero-rotator');
-      if (!el) return;
+    // ─── Dual-Line Hero Headline Typewriter Rotator (Looping 3 Phrases) ───
+    (function initHeadlineTypewriter() {
+      var line1El = document.getElementById('hero-typing-line1');
+      var line2El = document.getElementById('hero-rotator');
+      if (!line1El || !line2El) return;
+
       var phrases = [
-        "Akses Lengkap Dunia AI.",
-        "Tools Digital Terverifikasi.",
-        "Solusi Kerja Produktif.",
-        "Aktivasi Instan & Bergaransi."
+        {
+          line1: "Google AI Pro &",
+          line2: "Akses Lengkap Dunia AI."
+        },
+        {
+          line1: "Produk Digital Premium &",
+          line2: "Lisensi Resmi Bergaransi."
+        },
+        {
+          line1: "Katalog AI Mutakhir &",
+          line2: "Aktivasi Instan Otomatis."
+        }
       ];
+
       var pIdx = 0;
-      var cIdx = phrases[0].length;
-      var isDeleting = false;
-      var speed = 65;
+      var currentPhase = 'paused';
+      var charIdx1 = phrases[0].line1.length;
+      var charIdx2 = phrases[0].line2.length;
+
+      line1El.textContent = phrases[0].line1;
+      line2El.textContent = phrases[0].line2;
 
       function step() {
-        var curr = phrases[pIdx];
-        if (isDeleting) {
-          cIdx--;
-          el.textContent = curr.substring(0, cIdx);
-          speed = 30;
-        } else {
-          cIdx++;
-          el.textContent = curr.substring(0, cIdx);
-          speed = 65;
-        }
+        var current = phrases[pIdx];
 
-        if (!isDeleting && cIdx === curr.length) {
-          isDeleting = true;
-          speed = 2200;
-        } else if (isDeleting && cIdx === 0) {
-          isDeleting = false;
-          pIdx = (pIdx + 1) % phrases.length;
-          speed = 400;
+        if (currentPhase === 'typing-line1') {
+          charIdx1++;
+          line1El.textContent = current.line1.substring(0, charIdx1);
+          if (charIdx1 >= current.line1.length) {
+            currentPhase = 'typing-line2';
+            setTimeout(step, 80);
+            return;
+          }
+          setTimeout(step, 45);
+        } else if (currentPhase === 'typing-line2') {
+          charIdx2++;
+          line2El.textContent = current.line2.substring(0, charIdx2);
+          if (charIdx2 >= current.line2.length) {
+            currentPhase = 'paused';
+            setTimeout(step, 2400); // 2.4s pause so visitors can comfortably read
+            return;
+          }
+          setTimeout(step, 55);
+        } else if (currentPhase === 'paused') {
+          currentPhase = 'deleting-line2';
+          setTimeout(step, 30);
+        } else if (currentPhase === 'deleting-line2') {
+          charIdx2--;
+          line2El.textContent = current.line2.substring(0, charIdx2);
+          if (charIdx2 <= 0) {
+            currentPhase = 'deleting-line1';
+            setTimeout(step, 80);
+            return;
+          }
+          setTimeout(step, 20);
+        } else if (currentPhase === 'deleting-line1') {
+          charIdx1--;
+          line1El.textContent = current.line1.substring(0, charIdx1);
+          if (charIdx1 <= 0) {
+            pIdx = (pIdx + 1) % phrases.length;
+            charIdx1 = 0;
+            charIdx2 = 0;
+            currentPhase = 'typing-line1';
+            setTimeout(step, 300);
+            return;
+          }
+          setTimeout(step, 20);
         }
-        setTimeout(step, speed);
       }
-      setTimeout(step, 2000);
+
+      // Initial pause on the first phrase before starting typewriter loop
+      setTimeout(function() {
+        step();
+      }, 2500);
     })();
 
     // ─── Web3 Spotlight ───
@@ -226,23 +269,87 @@ declare(strict_types=1);
       }, { passive: true });
     }
 
-    // ─── Cute Mascot Hover & Deceleration Damping ───
-    var mascotLaptop = document.getElementById('mascot-hero-laptop');
-    if (mascotLaptop) {
-      mascotLaptop.addEventListener('mouseenter', function() {
+    // ─── Robot Mascot Voice & Speech Interaction ("Saya akan lawan!") ───
+    (function initMascotVoice() {
+      var mascot = document.getElementById('mascot-hero-laptop');
+      if (!mascot) return;
+
+      var isHovered = false;
+
+      function speakMascot() {
+        if (!('speechSynthesis' in window)) return;
+        try {
+          window.speechSynthesis.cancel(); // Stop any pending or playing audio immediately
+
+          var utter = new SpeechSynthesisUtterance('Saya akan lawan!');
+          utter.lang = 'id-ID';
+          utter.rate = 1.15;
+          utter.pitch = 1.35; // cute robot-like pitch
+
+          var voices = window.speechSynthesis.getVoices();
+          if (voices && voices.length > 0) {
+            var idVoice = voices.find(function(v) {
+              return v.lang && (v.lang.toLowerCase().indexOf('id') !== -1);
+            });
+            if (idVoice) utter.voice = idVoice;
+          }
+
+          mascot.classList.add('is-speaking');
+
+          utter.onend = function() {
+            if (!isHovered) {
+              mascot.classList.remove('is-speaking');
+            }
+          };
+          utter.onerror = function() {
+            mascot.classList.remove('is-speaking');
+          };
+
+          window.speechSynthesis.speak(utter);
+        } catch (err) {}
+      }
+
+      function stopMascot() {
+        if ('speechSynthesis' in window) {
+          try {
+            window.speechSynthesis.cancel(); // Mute/stop immediately
+          } catch (err) {}
+        }
+        mascot.classList.remove('is-speaking');
+        mascot.classList.remove('is-hovered');
+        mascot.classList.add('is-settling');
+      }
+
+      mascot.addEventListener('mouseenter', function() {
+        isHovered = true;
         this.classList.remove('is-settling');
         this.classList.add('is-hovered');
+        speakMascot();
       });
-      mascotLaptop.addEventListener('mouseleave', function() {
-        this.classList.remove('is-hovered');
-        this.classList.add('is-settling');
+
+      mascot.addEventListener('mouseleave', function() {
+        isHovered = false;
+        stopMascot();
       });
-      mascotLaptop.addEventListener('animationend', function(e) {
+
+      mascot.addEventListener('click', function(e) {
+        e.preventDefault();
+        isHovered = true;
+        this.classList.remove('is-settling');
+        this.classList.add('is-hovered');
+        speakMascot();
+        setTimeout(function() {
+          isHovered = false;
+          mascot.classList.remove('is-speaking');
+        }, 1800);
+      });
+
+      mascot.addEventListener('animationend', function(e) {
         if (e.animationName === 'mascotWiggleDecelerate') {
           this.classList.remove('is-settling');
         }
       });
-    }
+    })();
 
     // ─── Shopping Cart System & LocalStorage State ───
     var cartModal = document.getElementById('cart-drawer-modal');

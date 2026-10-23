@@ -41,11 +41,23 @@ declare(strict_types=1);
 
 <body class="<?= e($bodyClass ?? '') ?>">
 
-  <!-- Background Ambient Glow & Web3 Grid (100% GPU, Zero Lag) -->
+  <!-- Background Ambient Scene with Vertical Cyber Beams (Top to Bottom, Zero Lag) -->
   <div class="ambient-scene" aria-hidden="true">
     <div class="ambient-grid"></div>
     <div class="grid-spotlight" id="grid-spotlight"></div>
-    <div class="grid-scan-beam"></div>
+    
+    <!-- Vertical Cyber Rain / Electric Light Beams (Top to Bottom, Looping) -->
+    <div class="vertical-beams-container">
+      <div class="v-beam v-beam-1"></div>
+      <div class="v-beam v-beam-2"></div>
+      <div class="v-beam v-beam-3"></div>
+      <div class="v-beam v-beam-4"></div>
+      <div class="v-beam v-beam-5"></div>
+      <div class="v-beam v-beam-6"></div>
+      <div class="v-beam v-beam-7"></div>
+      <div class="v-beam v-beam-8"></div>
+    </div>
+
     <div class="ambient-orb ambient-orb-1"></div>
     <div class="ambient-orb ambient-orb-2"></div>
     <div class="ambient-orb ambient-orb-3"></div>
