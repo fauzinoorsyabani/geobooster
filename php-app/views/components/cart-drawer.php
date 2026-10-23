@@ -84,15 +84,3 @@ declare(strict_types=1);
     </div>
   </div>
 </div>
-
-<!-- Floating Toast Notification when adding to Cart -->
-<div class="cart-toast" id="cart-toast" aria-live="polite">
-  <div class="cart-toast-inner">
-    <div class="toast-icon">✓</div>
-    <div class="toast-content">
-      <strong id="toast-title">Produk ditambahkan!</strong>
-      <span id="toast-desc">Item siap di keranjang belanja.</span>
-    </div>
-    <button type="button" class="toast-btn-action" id="toast-view-cart">Lihat</button>
-  </div>
-</div>

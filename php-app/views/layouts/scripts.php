@@ -380,11 +380,6 @@ declare(strict_types=1);
     var cartDiscountRow = document.getElementById('cart-discount-row');
     var cartDiscountVal = document.getElementById('cart-discount-val');
     var cartTotalVal = document.getElementById('cart-total-val');
-    var cartToast = document.getElementById('cart-toast');
-    var toastTitle = document.getElementById('toast-title');
-    var toastDesc = document.getElementById('toast-desc');
-    var toastViewCart = document.getElementById('toast-view-cart');
-    var toastTimer = null;
 
     var ZiuCart = {
       items: [],
@@ -422,7 +417,6 @@ declare(strict_types=1);
           });
         }
         this.save();
-        this.showToast(product.name, 'Berhasil ditambahkan ke keranjang!');
         this.open();
       },
       remove: function(skuId) {
@@ -531,16 +525,6 @@ declare(strict_types=1);
         if (!cartModal) return;
         cartModal.classList.remove('is-open');
         document.body.style.overflow = '';
-      },
-      showToast: function(title, desc) {
-        if (!cartToast) return;
-        if (toastTitle) toastTitle.textContent = title;
-        if (toastDesc) toastDesc.textContent = desc;
-        cartToast.classList.add('is-shown');
-        clearTimeout(toastTimer);
-        toastTimer = setTimeout(function() {
-          cartToast.classList.remove('is-shown');
-        }, 3500);
       }
     };
 
@@ -570,12 +554,6 @@ declare(strict_types=1);
         if (confirm('Kosongkan semua item di keranjang?')) {
           ZiuCart.clear();
         }
-      });
-    }
-    if (toastViewCart) {
-      toastViewCart.addEventListener('click', function() {
-        if (cartToast) cartToast.classList.remove('is-shown');
-        ZiuCart.open();
       });
     }
 
