@@ -239,11 +239,55 @@ declare(strict_types=1);
       if (!mascot) return;
 
       var isHovered = false;
+      var customAudio = null;
+      var hasCustomAudio = false;
+
+      // Preload custom audio if placed in /assets/audio/mascot-voice.mp3
+      try {
+        customAudio = new Audio('/assets/audio/mascot-voice.mp3');
+        customAudio.preload = 'auto';
+        customAudio.addEventListener('canplaythrough', function() {
+          hasCustomAudio = true;
+        });
+        customAudio.addEventListener('error', function() {
+          hasCustomAudio = false;
+        });
+      } catch (e) {
+        hasCustomAudio = false;
+      }
 
       function speakMascot() {
+        mascot.classList.add('is-speaking');
+
+        // Priority 1: Play custom audio file if available
+        if (hasCustomAudio && customAudio) {
+          try {
+            customAudio.currentTime = 0;
+            var playPromise = customAudio.play();
+            if (playPromise !== undefined) {
+              playPromise.then(function() {
+                customAudio.onended = function() {
+                  if (!isHovered) mascot.classList.remove('is-speaking');
+                };
+              }).catch(function() {
+                fallbackSpeechSynthesis();
+              });
+              return;
+            }
+          } catch (e) {
+            fallbackSpeechSynthesis();
+            return;
+          }
+        }
+
+        // Priority 2: Fallback to Browser Speech Synthesis
+        fallbackSpeechSynthesis();
+      }
+
+      function fallbackSpeechSynthesis() {
         if (!('speechSynthesis' in window)) return;
         try {
-          window.speechSynthesis.cancel(); // Stop any pending or playing audio immediately
+          window.speechSynthesis.cancel(); // Stop any pending audio immediately
 
           var utter = new SpeechSynthesisUtterance('Saya akan lawan!');
           utter.lang = 'id-ID';
@@ -257,8 +301,6 @@ declare(strict_types=1);
             });
             if (idVoice) utter.voice = idVoice;
           }
-
-          mascot.classList.add('is-speaking');
 
           utter.onend = function() {
             if (!isHovered) {
@@ -274,6 +316,12 @@ declare(strict_types=1);
       }
 
       function stopMascot() {
+        if (customAudio) {
+          try {
+            customAudio.pause();
+            customAudio.currentTime = 0;
+          } catch (e) {}
+        }
         if ('speechSynthesis' in window) {
           try {
             window.speechSynthesis.cancel(); // Mute/stop immediately
