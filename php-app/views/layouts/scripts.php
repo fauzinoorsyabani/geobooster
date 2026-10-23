@@ -180,7 +180,7 @@ declare(strict_types=1);
         "Akses Lengkap Dunia AI.",
         "Tools Digital Terverifikasi.",
         "Aktivasi Cepat & Otomatis.",
-        "Garansi Akun Aman & Resmi.",
+        "Solusi Digital Terpercaya.",
         "Eksplorasi AI Tanpa Batas."
       ];
 
