@@ -11,11 +11,11 @@ use GeoBooster\Security\AuditLogger;
 
 final class WhatsAppNotifier
 {
-    private string $provider;
-    private string $apiKey;
-    private string $apiUrl;
-    private string $senderPhone;
-    private string $appUrl;
+    private string $provider = 'mock';
+    private string $apiKey = '';
+    private string $apiUrl = 'https://api.fonnte.com/send';
+    private string $senderPhone = '62895609250509';
+    private string $appUrl = 'http://127.0.0.1:8080';
 
     public function __construct(private readonly PDO $db)
     {
