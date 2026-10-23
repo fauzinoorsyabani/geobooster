@@ -381,7 +381,7 @@ try {
       gap: 4px;
       background: #f1f5f9;
       color: #0f172a;
-      border: 1px solid #cbd5e1;
+      border: none;
       font-size: 11px;
       font-weight: 700;
       padding: 2px 7px;
@@ -854,7 +854,6 @@ try {
       <a href="/" class="portal-brand">
         <img src="/assets/logos/ziulabs-icon.webp" alt="ZiuLabs" width="30" height="30">
         <span>ZiuLabs</span>
-        <span class="portal-badge">Customer Portal</span>
       </a>
 
       <!-- Desktop Nav Actions -->
