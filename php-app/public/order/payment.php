@@ -78,43 +78,74 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="/assets/style.css">
   <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      margin: 0;
+      padding: 0;
+    }
     .pay-page-wrap {
       min-height: 100vh;
+      width: 100%;
       background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.07) 0%, rgba(248, 250, 252, 1) 60%);
-      padding: 40px 20px 80px 20px;
-      font-family: 'Plus Jakarta Sans', system-ui, sans-serif;
+      padding: 36px 16px 80px 16px;
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+      box-sizing: border-box;
     }
     .pay-container {
-      max-width: 600px;
+      width: 100%;
+      max-width: 540px;
       margin: 0 auto;
+      box-sizing: border-box;
     }
     .pay-card {
       background: #ffffff;
       border: 1px solid rgba(0, 102, 255, 0.16);
       border-radius: 24px;
-      padding: 36px 32px;
+      padding: 32px 28px;
       box-shadow: 0 16px 40px rgba(10, 25, 50, 0.07);
+      box-sizing: border-box;
+      width: 100%;
+      overflow: hidden;
     }
     .pay-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      margin-bottom: 24px;
-      padding-bottom: 18px;
+      gap: 12px;
+      margin-bottom: 22px;
+      padding-bottom: 16px;
       border-bottom: 1px solid #e2e8f0;
+      flex-wrap: wrap;
     }
     .pay-brand {
-      display: flex;
+      display: inline-flex;
       align-items: center;
       gap: 10px;
+      min-width: 0;
+    }
+    .pay-brand img {
+      flex-shrink: 0;
+    }
+    .pay-brand span {
+      font-weight: 800;
+      color: #0066ff;
+      font-size: 1.05rem;
+      letter-spacing: -0.01em;
     }
     .pay-status-pill {
-      font-size: 0.8rem;
+      font-size: 0.76rem;
       font-weight: 700;
-      padding: 6px 14px;
-      border-radius: 20px;
+      padding: 5px 12px;
+      border-radius: 999px;
       text-transform: uppercase;
       letter-spacing: 0.04em;
+      white-space: nowrap;
+      flex-shrink: 0;
     }
     .pay-status-pill.awaiting {
       background: #fffbeb;
@@ -130,54 +161,73 @@ try {
       background: linear-gradient(135deg, #f0f7ff, #e6f0fa);
       border: 1px solid #c7dfff;
       border-radius: 18px;
-      padding: 22px;
+      padding: 20px 16px;
       text-align: center;
-      margin-bottom: 26px;
+      margin-bottom: 22px;
+      box-sizing: border-box;
+      width: 100%;
     }
     .pay-amount-label {
-      font-size: 0.85rem;
-      font-weight: 600;
+      font-size: 0.78rem;
+      font-weight: 700;
       color: #0052cc;
       text-transform: uppercase;
-      letter-spacing: 0.05em;
+      letter-spacing: 0.06em;
+      display: block;
     }
     .pay-amount-val {
-      font-size: 2.2rem;
+      font-size: 2.1rem;
       font-weight: 800;
       color: #0f172a;
       letter-spacing: -0.02em;
       margin: 6px 0;
+      line-height: 1.2;
+      word-break: break-word;
     }
     .pay-timer {
-      font-size: 0.88rem;
+      font-size: 0.85rem;
       color: #64748b;
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
+      flex-wrap: wrap;
     }
     .pay-timer strong {
       color: #dc2626;
       font-family: 'JetBrains Mono', monospace;
+      font-weight: 700;
     }
     .qris-box {
       text-align: center;
       background: radial-gradient(circle at 50% 0%, rgba(0, 102, 255, 0.05) 0%, #ffffff 80%);
       border: 1.5px solid rgba(0, 102, 255, 0.22);
-      border-radius: 24px;
-      padding: 24px 20px;
-      margin-bottom: 24px;
+      border-radius: 20px;
+      padding: 22px 16px;
+      margin-bottom: 20px;
       box-shadow: 0 10px 30px rgba(0, 102, 255, 0.06);
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .qris-box-title {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      margin-bottom: 6px;
+      flex-wrap: wrap;
     }
     .qris-banner-img {
       width: 100%;
-      max-width: 310px;
+      max-width: 270px;
       height: auto;
-      border-radius: 20px;
+      border-radius: 18px;
       margin: 12px auto 14px auto;
       display: block;
       box-shadow: 0 12px 32px rgba(0, 102, 255, 0.16);
       border: 1px solid rgba(0, 102, 255, 0.2);
       transition: transform 0.2s ease;
+      box-sizing: border-box;
     }
     .qris-banner-img:hover {
       transform: scale(1.02);
@@ -185,93 +235,97 @@ try {
     .qris-download-btn {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 6px;
       background: #f0f7ff;
       border: 1px solid #bfdbfe;
       color: #0284c7;
-      font-size: 0.8rem;
+      font-size: 0.82rem;
       font-weight: 700;
-      padding: 6px 14px;
+      padding: 7px 16px;
       border-radius: 999px;
       text-decoration: none;
       margin-bottom: 8px;
+      max-width: 100%;
       transition: all 0.15s ease;
+      box-sizing: border-box;
     }
     .qris-download-btn:hover {
       background: #e0f2fe;
       color: #0369a1;
       border-color: #93c5fd;
     }
-    .order-details-table {
-      width: 100%;
-      border-collapse: collapse;
-      margin: 20px 0;
-      font-size: 0.9rem;
-    }
-    .order-details-table td {
-      padding: 10px 0;
-      border-bottom: 1px solid #f1f5f9;
-    }
-    .order-details-table td:last-child {
-      text-align: right;
-      font-weight: 600;
-      color: #0f172a;
-    }
-    .order-details-table td:first-child {
-      color: #64748b;
-    }
-    .license-card {
-      background: #ecfdf5;
-      border: 1.5px solid #10b981;
-      border-radius: 18px;
-      padding: 24px;
-      margin: 20px 0;
-    }
-    .license-card h4 {
-      margin: 0 0 10px 0;
-      color: #065f46;
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 1.05rem;
-    }
-    .license-credential-box {
-      background: #ffffff;
-      border: 1px solid #a7f3d0;
+    .qris-nominal-notice {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
       border-radius: 12px;
-      padding: 14px 16px;
-      font-family: 'JetBrains Mono', monospace;
-      font-size: 0.92rem;
+      padding: 10px 14px;
+      margin-top: 12px;
+      font-size: 0.84rem;
+      color: #475569;
+      box-sizing: border-box;
+      word-break: break-word;
+    }
+
+    /* Structured Order Details Card (Immune to Table Overflow) */
+    .order-details-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 16px 18px;
+      margin: 18px 0;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .order-detail-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+      gap: 12px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #edf2f7;
+      font-size: 0.88rem;
+    }
+    .order-detail-row:last-child {
+      padding-bottom: 0;
+      border-bottom: none;
+    }
+    .order-detail-label {
+      color: #64748b;
+      font-weight: 500;
+      flex-shrink: 0;
+    }
+    .order-detail-val {
       color: #0f172a;
+      font-weight: 600;
+      text-align: right;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+    }
+
+    .btn-simulate-pay {
       display: flex;
       align-items: center;
-      justify-content: space-between;
-      margin: 12px 0;
-    }
-    .btn-copy-code {
-      background: #0066ff;
-      color: #ffffff;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 8px;
-      font-size: 0.8rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-simulate-pay {
-      display: block;
+      justify-content: center;
+      gap: 8px;
       width: 100%;
       background: #10b981;
       color: #ffffff;
-      padding: 14px 20px;
+      padding: 14px 18px;
       border: none;
       border-radius: 14px;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       font-weight: 700;
       cursor: pointer;
-      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.3);
+      box-shadow: 0 4px 14px rgba(16, 185, 129, 0.28);
       transition: all 0.2s ease;
       margin: 14px 0;
+      box-sizing: border-box;
+      text-align: center;
+      line-height: 1.35;
     }
     .btn-simulate-pay:hover {
       background: #059669;
@@ -281,87 +335,122 @@ try {
       display: block;
       text-align: center;
       color: #0066ff;
-      font-size: 0.9rem;
+      font-size: 0.88rem;
       font-weight: 600;
       text-decoration: none;
-      margin-top: 20px;
+      margin-top: 18px;
+      padding: 6px;
     }
-    /* Credential Pool Customer Card */
+
+    /* License & Credential Card */
+    .license-card {
+      background: #ecfdf5;
+      border: 1.5px solid #10b981;
+      border-radius: 18px;
+      padding: 20px 18px;
+      margin: 18px 0;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .license-card h4 {
+      margin: 0 0 10px 0;
+      color: #065f46;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 1.02rem;
+      flex-wrap: wrap;
+    }
     .credential-pool-wrap {
       display: flex;
       flex-direction: column;
       gap: 12px;
       margin: 14px 0;
+      width: 100%;
     }
     .cred-card {
       background: #ffffff;
       border: 1px solid #a7f3d0;
-      border-radius: 16px;
-      padding: 16px 18px;
+      border-radius: 14px;
+      padding: 14px 16px;
       box-shadow: 0 4px 14px rgba(16, 185, 129, 0.08);
       text-align: left;
-    }
-    .cred-card.cred-pending {
-      border-color: #fde68a;
-      background: #fffbeb;
+      box-sizing: border-box;
+      width: 100%;
     }
     .cred-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       font-weight: 700;
-      font-size: 0.95rem;
+      font-size: 0.92rem;
       color: #065f46;
-      padding-bottom: 10px;
+      padding-bottom: 8px;
       border-bottom: 1px dashed #d1fae5;
-      margin-bottom: 12px;
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
     .cred-badge-active {
-      font-size: 0.72rem;
+      font-size: 0.7rem;
       background: #d1fae5;
       color: #047857;
-      padding: 3px 8px;
+      padding: 2px 7px;
       border-radius: 6px;
       font-weight: 800;
       text-transform: uppercase;
+      white-space: nowrap;
     }
     .cred-row {
       display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 10px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      margin-bottom: 12px;
+      width: 100%;
     }
     .cred-label {
-      width: 90px;
-      font-size: 0.8rem;
+      font-size: 0.74rem;
       font-weight: 700;
       color: #065f46;
       text-transform: uppercase;
-      flex-shrink: 0;
+      letter-spacing: 0.04em;
     }
     .cred-val-wrap {
-      flex: 1;
       background: #f8fafc;
       border: 1px solid #e2e8f0;
       border-radius: 8px;
-      padding: 6px 12px;
+      padding: 8px 12px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 0.88rem;
+      font-size: 0.86rem;
       color: #0f172a;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .cred-actions-bar {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: 4px;
     }
     .btn-cred-copy, .btn-cred-toggle {
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
       background: #0f172a;
       color: #ffffff;
       border: none;
-      border-radius: 6px;
-      padding: 6px 10px;
+      border-radius: 8px;
+      padding: 8px 12px;
       font-size: 0.78rem;
       font-weight: 700;
       cursor: pointer;
-      white-space: nowrap;
       transition: all 0.15s ease;
+      box-sizing: border-box;
     }
     .btn-cred-copy:hover {
       background: #0066ff;
@@ -374,11 +463,90 @@ try {
       background: #cbd5e1;
     }
     .cred-notes {
-      margin-top: 10px;
+      margin-top: 8px;
       padding-top: 8px;
       border-top: 1px solid #f1f5f9;
       color: #047857;
-      font-size: 0.82rem;
+      font-size: 0.8rem;
+      line-height: 1.4;
+    }
+
+    /* ─── Responsive Mobile Overrides (< 640px) ─── */
+    @media (max-width: 640px) {
+      .pay-page-wrap {
+        padding: 16px 12px 48px 12px;
+      }
+      .pay-card {
+        padding: 20px 16px;
+        border-radius: 20px;
+      }
+      .pay-header {
+        margin-bottom: 16px;
+        padding-bottom: 14px;
+      }
+      .pay-brand span {
+        font-size: 0.96rem;
+      }
+      .pay-amount-box {
+        padding: 16px 12px;
+        border-radius: 14px;
+        margin-bottom: 18px;
+      }
+      .pay-amount-val {
+        font-size: 1.75rem;
+      }
+      .pay-timer {
+        font-size: 0.8rem;
+      }
+      .qris-box {
+        padding: 18px 12px;
+        border-radius: 16px;
+        margin-bottom: 16px;
+      }
+      .qris-banner-img {
+        max-width: 240px;
+      }
+      .btn-simulate-pay {
+        font-size: 0.86rem;
+        padding: 12px 14px;
+      }
+      .order-details-card {
+        padding: 14px 12px;
+        border-radius: 14px;
+      }
+      .order-detail-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 3px;
+        padding-bottom: 8px;
+      }
+      .order-detail-label {
+        font-size: 0.75rem;
+      }
+      .order-detail-val {
+        text-align: left;
+        font-size: 0.86rem;
+      }
+      .license-card {
+        padding: 16px 12px;
+        border-radius: 14px;
+      }
+    }
+
+    @media (max-width: 380px) {
+      .pay-page-wrap {
+        padding: 10px 8px 36px 8px;
+      }
+      .pay-card {
+        padding: 16px 12px;
+        border-radius: 16px;
+      }
+      .pay-amount-val {
+        font-size: 1.55rem;
+      }
+      .qris-banner-img {
+        max-width: 210px;
+      }
     }
   </style>
 </head>
@@ -424,22 +592,37 @@ try {
             </div>
           </div>
 
-          <table class="order-details-table">
-            <tr><td>Nomor Pesanan</td><td><?= htmlspecialchars($order['public_id']) ?></td></tr>
-            <tr><td>Produk</td><td><?= htmlspecialchars($itemName) ?></td></tr>
-            <tr><td>Total Dibayar</td><td style="color: #059669; font-weight: 800;"><?= $totalFormatted ?></td></tr>
-            <tr><td>Nomor WhatsApp</td><td><?= htmlspecialchars($order['customer_phone']) ?></td></tr>
-            <tr><td>Email</td><td><?= htmlspecialchars($order['customer_email'] ?? '-') ?></td></tr>
-          </table>
+          <div class="order-details-card">
+            <div class="order-detail-row">
+              <span class="order-detail-label">Nomor Pesanan</span>
+              <span class="order-detail-val"><?= htmlspecialchars($order['public_id']) ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Produk</span>
+              <span class="order-detail-val"><?= htmlspecialchars($itemName) ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Total Dibayar</span>
+              <span class="order-detail-val" style="color: #059669; font-weight: 800;"><?= $totalFormatted ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Nomor WhatsApp</span>
+              <span class="order-detail-val"><?= htmlspecialchars($order['customer_phone']) ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Email</span>
+              <span class="order-detail-val"><?= htmlspecialchars($order['customer_email'] ?? '-') ?></span>
+            </div>
+          </div>
 
-          <div style="display: flex; gap: 12px; margin-top: 18px; flex-wrap: wrap;">
+          <div style="display: flex; gap: 10px; margin-top: 18px; flex-wrap: wrap;">
             <?php if ($waFulfillmentUrl): ?>
-              <a href="<?= htmlspecialchars($waFulfillmentUrl) ?>" target="_blank" style="flex: 1; min-width: 220px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #22c55e; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.92rem; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); transition: background 0.2s;">
+              <a href="<?= htmlspecialchars($waFulfillmentUrl) ?>" target="_blank" style="flex: 1 1 200px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; background: #22c55e; color: #ffffff; text-decoration: none; padding: 12px 18px; border-radius: 12px; font-weight: 700; font-size: 0.88rem; box-shadow: 0 4px 12px rgba(34, 197, 94, 0.25); transition: background 0.2s; box-sizing: border-box; text-align: center;">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path></svg>
                 Simpan di WhatsApp Saya
               </a>
             <?php endif; ?>
-            <a href="/dashboard/" class="btn-simulate-pay" style="flex: 1; min-width: 220px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin: 0;">
+            <a href="/dashboard/" class="btn-simulate-pay" style="flex: 1 1 200px; text-align: center; text-decoration: none; display: inline-flex; align-items: center; justify-content: center; margin: 0; box-sizing: border-box;">
               Buka Customer Dashboard &rarr;
             </a>
           </div>
@@ -456,11 +639,11 @@ try {
           </div>
 
           <div class="qris-box">
-            <div style="display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 6px;">
-              <span style="font-weight: 800; font-size: 1.1rem; color: #0f172a;">QRIS RESMI ZIULABS</span>
+            <div class="qris-box-title">
+              <span style="font-weight: 800; font-size: 1.05rem; color: #0f172a;">QRIS RESMI ZIULABS</span>
               <span style="background: #ecfdf5; color: #047857; font-size: 0.72rem; font-weight: 800; padding: 2px 8px; border-radius: 6px; border: 1px solid #a7f3d0;">SCAN &amp; BAYAR</span>
             </div>
-            <p style="font-size: 0.85rem; color: #64748b; margin: 0 0 12px 0;">Buka m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay), lalu scan kode QR resmi di bawah ini:</p>
+            <p style="font-size: 0.84rem; color: #64748b; margin: 0 0 12px 0;">Buka m-Banking (BCA, Mandiri, BRI, BNI) atau e-Wallet (GoPay, OVO, Dana, ShopeePay), lalu scan kode QR resmi di bawah ini:</p>
             
             <a href="/assets/qris-ziulabs.png" target="_blank" title="Klik untuk memperbesar gambar QR">
               <img class="qris-banner-img" src="/assets/qris-ziulabs.png" alt="QRIS Resmi ZiuLabs">
@@ -473,7 +656,7 @@ try {
               </a>
             </div>
             
-            <div style="background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 10px 14px; margin-top: 10px; font-size: 0.84rem; color: #475569;">
+            <div class="qris-nominal-notice">
               Pastikan nominal pembayaran sesuai: <strong style="color: #0066ff;"><?= $totalFormatted ?></strong>
             </div>
           </div>
@@ -482,16 +665,29 @@ try {
           <form method="post" action="/api/simulate-payment.php">
             <input type="hidden" name="order_id" value="<?= htmlspecialchars($order['public_id']) ?>">
             <button type="submit" class="btn-simulate-pay">
-              ⚡ Simulasi Pembayaran Sukses (Uji Coba Sandbox)
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg>
+              <span>Simulasi Pembayaran Sukses (Uji Coba Sandbox)</span>
             </button>
           </form>
 
-          <table class="order-details-table">
-            <tr><td>Nomor Pesanan</td><td><?= htmlspecialchars($order['public_id']) ?></td></tr>
-            <tr><td>Item</td><td><?= htmlspecialchars($itemName) ?></td></tr>
-            <tr><td>Pemesan</td><td><?= htmlspecialchars($order['customer_name'] ?? 'Pelanggan') ?> (<?= htmlspecialchars($order['customer_phone']) ?>)</td></tr>
-            <tr><td>Metode</td><td>QRIS Nasional (Bebas Biaya Admin)</td></tr>
-          </table>
+          <div class="order-details-card">
+            <div class="order-detail-row">
+              <span class="order-detail-label">Nomor Pesanan</span>
+              <span class="order-detail-val"><?= htmlspecialchars($order['public_id']) ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Item</span>
+              <span class="order-detail-val"><?= htmlspecialchars($itemName) ?></span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Pemesan</span>
+              <span class="order-detail-val"><?= htmlspecialchars($order['customer_name'] ?? 'Pelanggan') ?> (<?= htmlspecialchars($order['customer_phone']) ?>)</span>
+            </div>
+            <div class="order-detail-row">
+              <span class="order-detail-label">Metode</span>
+              <span class="order-detail-val">QRIS Nasional (Bebas Biaya Admin)</span>
+            </div>
+          </div>
 
           <div style="text-align: center; margin-top: 14px;">
             <a href="<?= htmlspecialchars($waCsHelpUrl) ?>" target="_blank" style="display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-size: 0.85rem; font-weight: 600; color: #059669; text-decoration: none;">

@@ -65,7 +65,7 @@ if (!function_exists('renderFulfillmentCard')) {
             $isManual = ($item['type'] ?? '') === 'manual_queue';
             if ($isManual) {
                 $html .= '<div class="cred-card cred-pending">' .
-                         '<div class="cred-card-header">⏳ ' . e($item['sku_name'] ?? 'Item') . ' — Antrean Pemrosesan</div>' .
+                         '<div class="cred-card-header">' . e($item['sku_name'] ?? 'Item') . ' — Antrean Pemrosesan</div>' .
                          '<p class="cred-card-text">' . e($item['message'] ?? 'Stok sedang disiapkan secara manual oleh tim ZiuLabs.') . '</p>' .
                          '</div>';
                 continue;
@@ -73,45 +73,49 @@ if (!function_exists('renderFulfillmentCard')) {
 
             $html .= '<div class="cred-card">' .
                      '<div class="cred-card-header">' .
-                     '<span>📦 ' . e($item['sku_name'] ?? 'Kredensial Produk') . '</span>' .
+                     '<span>' . e($item['sku_name'] ?? 'Kredensial Produk') . '</span>' .
                      '<span class="cred-badge-active">Aktif &amp; Bergaransi</span>' .
                      '</div><div class="cred-card-body">';
 
             if (!empty($item['account_email'])) {
                 $html .= '<div class="cred-row">' .
-                         '<span class="cred-label">Email / ID</span>' .
+                         '<span class="cred-label">Email / ID Akun</span>' .
                          '<div class="cred-val-wrap"><code>' . e($item['account_email']) . '</code></div>' .
-                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['account_email'])) . '\'); this.innerText=\'Tersalin!\';">Salin</button>' .
-                         '</div>';
+                         '<div class="cred-actions-bar">' .
+                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['account_email'])) . '\'); this.innerText=\'Tersalin!\';">Salin Email</button>' .
+                         '</div></div>';
             }
 
             if (!empty($item['account_password'])) {
                 $html .= '<div class="cred-row">' .
                          '<span class="cred-label">Password</span>' .
                          '<div class="cred-val-wrap"><code class="js-pass-reveal" data-pass="' . e($item['account_password']) . '">••••••••••••</code></div>' .
-                         '<button type="button" class="btn-cred-toggle" onclick="var c=this.previousElementSibling.querySelector(\'.js-pass-reveal\'); if(c.innerText===\'••••••••••••\'){ c.innerText=c.dataset.pass; this.innerText=\'Tutup\'; } else { c.innerText=\'••••••••••••\'; this.innerText=\'Lihat\'; }">Lihat</button>' .
-                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['account_password'])) . '\'); this.innerText=\'Tersalin!\';">Salin</button>' .
-                         '</div>';
+                         '<div class="cred-actions-bar">' .
+                         '<button type="button" class="btn-cred-toggle" onclick="var c=this.closest(\'.cred-row\').querySelector(\'.js-pass-reveal\'); if(c.innerText===\'••••••••••••\'){ c.innerText=c.dataset.pass; this.innerText=\'Sembunyikan\'; } else { c.innerText=\'••••••••••••\'; this.innerText=\'Lihat\'; }">Lihat</button>' .
+                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['account_password'])) . '\'); this.innerText=\'Tersalin!\';">Salin Password</button>' .
+                         '</div></div>';
             }
 
             if (!empty($item['license_key'])) {
                 $html .= '<div class="cred-row">' .
                          '<span class="cred-label">Kode Lisensi</span>' .
                          '<div class="cred-val-wrap"><code>' . e($item['license_key']) . '</code></div>' .
-                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['license_key'])) . '\'); this.innerText=\'Tersalin!\';">Salin</button>' .
-                         '</div>';
+                         '<div class="cred-actions-bar">' .
+                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['license_key'])) . '\'); this.innerText=\'Tersalin!\';">Salin Lisensi</button>' .
+                         '</div></div>';
             }
 
             if (!empty($item['invite_url'])) {
                 $html .= '<div class="cred-row">' .
                          '<span class="cred-label">Link Undangan</span>' .
                          '<div class="cred-val-wrap"><a href="' . e($item['invite_url']) . '" target="_blank" rel="noopener" style="color:#0066ff;text-decoration:underline;font-size:0.85rem;word-break:break-all;">Gabung Tim / Buka Undangan ↗</a></div>' .
-                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['invite_url'])) . '\'); this.innerText=\'Tersalin!\';">Salin</button>' .
-                         '</div>';
+                         '<div class="cred-actions-bar">' .
+                         '<button type="button" class="btn-cred-copy" onclick="navigator.clipboard.writeText(\'' . e(addslashes($item['invite_url'])) . '\'); this.innerText=\'Tersalin!\';">Salin Link</button>' .
+                         '</div></div>';
             }
 
             if (!empty($item['additional_notes'])) {
-                $html .= '<div class="cred-notes"><small>💡 ' . e($item['additional_notes']) . '</small></div>';
+                $html .= '<div class="cred-notes"><small>' . e($item['additional_notes']) . '</small></div>';
             }
 
             $html .= '</div></div>';
