@@ -19,7 +19,7 @@ declare(strict_types=1);
 
       <h1 class="hero-headline">
         <span class="hero-headline-line1">
-          <span id="hero-typing-line1">Google AI Pro &amp;</span>
+          Google AI Pro &amp;
           <span class="mascot-laptop-floating" id="mascot-hero-laptop" title="ZiuBot — Asisten AI ZiuLabs (Sentuh / Hover Saya!)" aria-label="Maskot ZiuBot">
             <span class="mascot-speech-bubble" id="mascot-speech-bubble">Saya akan lawan!</span>
             <img src="/assets/mascot/ziubot-laptop-256.webp" alt="ZiuBot" width="98" height="114" class="mascot-laptop-img" />

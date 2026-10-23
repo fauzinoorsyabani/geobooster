@@ -171,87 +171,48 @@ declare(strict_types=1);
       }
     });
 
-    // ─── Dual-Line Hero Headline Typewriter Rotator (Looping 3 Phrases) ───
-    (function initHeadlineTypewriter() {
-      var line1El = document.getElementById('hero-typing-line1');
-      var line2El = document.getElementById('hero-rotator');
-      if (!line1El || !line2El) return;
+    // ─── Single-Line Hero Sub-Headline Typewriter Rotator (Bottom Line Only) ───
+    (function initBottomLineTypewriter() {
+      var el = document.getElementById('hero-rotator');
+      if (!el) return;
 
       var phrases = [
-        {
-          line1: "Google AI Pro &",
-          line2: "Akses Lengkap Dunia AI."
-        },
-        {
-          line1: "Produk Digital Premium &",
-          line2: "Lisensi Resmi Bergaransi."
-        },
-        {
-          line1: "Katalog AI Mutakhir &",
-          line2: "Aktivasi Instan Otomatis."
-        }
+        "Akses Lengkap Dunia AI.",
+        "Tools Digital Terverifikasi.",
+        "Aktivasi Instan & Bergaransi."
       ];
 
       var pIdx = 0;
-      var currentPhase = 'paused';
-      var charIdx1 = phrases[0].line1.length;
-      var charIdx2 = phrases[0].line2.length;
+      var cIdx = phrases[0].length;
+      var isDeleting = false;
+      var speed = 65;
 
-      line1El.textContent = phrases[0].line1;
-      line2El.textContent = phrases[0].line2;
+      el.textContent = phrases[0];
 
       function step() {
-        var current = phrases[pIdx];
-
-        if (currentPhase === 'typing-line1') {
-          charIdx1++;
-          line1El.textContent = current.line1.substring(0, charIdx1);
-          if (charIdx1 >= current.line1.length) {
-            currentPhase = 'typing-line2';
-            setTimeout(step, 80);
-            return;
-          }
-          setTimeout(step, 45);
-        } else if (currentPhase === 'typing-line2') {
-          charIdx2++;
-          line2El.textContent = current.line2.substring(0, charIdx2);
-          if (charIdx2 >= current.line2.length) {
-            currentPhase = 'paused';
-            setTimeout(step, 2400); // 2.4s pause so visitors can comfortably read
-            return;
-          }
-          setTimeout(step, 55);
-        } else if (currentPhase === 'paused') {
-          currentPhase = 'deleting-line2';
-          setTimeout(step, 30);
-        } else if (currentPhase === 'deleting-line2') {
-          charIdx2--;
-          line2El.textContent = current.line2.substring(0, charIdx2);
-          if (charIdx2 <= 0) {
-            currentPhase = 'deleting-line1';
-            setTimeout(step, 80);
-            return;
-          }
-          setTimeout(step, 20);
-        } else if (currentPhase === 'deleting-line1') {
-          charIdx1--;
-          line1El.textContent = current.line1.substring(0, charIdx1);
-          if (charIdx1 <= 0) {
-            pIdx = (pIdx + 1) % phrases.length;
-            charIdx1 = 0;
-            charIdx2 = 0;
-            currentPhase = 'typing-line1';
-            setTimeout(step, 300);
-            return;
-          }
-          setTimeout(step, 20);
+        var curr = phrases[pIdx];
+        if (isDeleting) {
+          cIdx--;
+          el.textContent = curr.substring(0, cIdx);
+          speed = 28;
+        } else {
+          cIdx++;
+          el.textContent = curr.substring(0, cIdx);
+          speed = 65;
         }
+
+        if (!isDeleting && cIdx === curr.length) {
+          isDeleting = true;
+          speed = 2400; // Pause 2.4s so visitors can comfortably read
+        } else if (isDeleting && cIdx === 0) {
+          isDeleting = false;
+          pIdx = (pIdx + 1) % phrases.length;
+          speed = 350; // Brief pause before typing next phrase
+        }
+        setTimeout(step, speed);
       }
 
-      // Initial pause on the first phrase before starting typewriter loop
-      setTimeout(function() {
-        step();
-      }, 2500);
+      setTimeout(step, 2400);
     })();
 
     // ─── Web3 Spotlight ───
