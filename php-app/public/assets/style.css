@@ -644,29 +644,61 @@ input { font-family: inherit; }
   100% { transform: translate3d(0, 0, 0) rotate(0deg); }
 }
 
-/* Web3 Dynamic Rotating Text Badge */
+/* Web3 Dynamic Rotating Text Badge with Glassmorphic Tech Background */
 .rotator-badge {
   display: inline-flex;
-  align-items: baseline;
-  gap: 2px;
-  color: var(--blue-ziulabs);
+  align-items: center;
   position: relative;
+  background: linear-gradient(135deg, rgba(0, 102, 255, 0.08) 0%, rgba(0, 102, 255, 0.15) 100%);
+  border: 1px solid rgba(0, 102, 255, 0.28);
+  border-radius: 8px;
+  padding: 3px 14px;
+  margin-top: 6px;
+  color: var(--blue-ziulabs);
+  box-shadow: 0 4px 16px rgba(0, 102, 255, 0.12), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  min-height: 1.3em;
+  max-width: 100%;
+  overflow: hidden;
+  vertical-align: middle;
+}
+
+.rotator-badge::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -120%;
+  width: 70%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.45), transparent);
+  animation: rotatorBadgeSheen 4.5s infinite ease-in-out;
+  pointer-events: none;
+}
+
+@keyframes rotatorBadgeSheen {
+  0%, 65% { transform: translateX(0); }
+  100% { transform: translateX(350%); }
 }
 
 .rotator-text {
   color: var(--blue-ziulabs);
-  font-weight: 700;
-  text-shadow: 0 0 24px rgba(0, 102, 255, 0.3);
-  display: inline;
+  font-weight: 600;
+  display: inline-block;
+  letter-spacing: -0.01em;
+  position: relative;
+  z-index: 2;
 }
 
 .rotator-cursor {
   display: inline-block;
   color: var(--blue-ziulabs);
   font-weight: 300;
-  margin-left: 2px;
+  margin-left: 3px;
   animation: cursorBlink 0.85s infinite;
   text-shadow: 0 0 10px rgba(0, 102, 255, 0.6);
+  position: relative;
+  z-index: 2;
 }
 
 @keyframes cursorBlink {

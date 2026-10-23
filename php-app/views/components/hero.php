@@ -26,7 +26,7 @@ declare(strict_types=1);
           </span>
         </span><br>
         <span class="rotator-badge">
-          <span class="rotator-text" id="hero-rotator">Akses Lengkap Dunia AI.</span>
+          <span class="rotator-text" id="hero-rotator"></span>
           <span class="rotator-cursor" aria-hidden="true">|</span>
         </span>
       </h1>

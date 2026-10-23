@@ -171,7 +171,7 @@ declare(strict_types=1);
       }
     });
 
-    // ─── Single-Line Hero Sub-Headline Typewriter Rotator (Bottom Line Only) ───
+    // ─── Single-Line Hero Sub-Headline Typewriter Rotator (Bottom Line Only, Looping) ───
     (function initBottomLineTypewriter() {
       var el = document.getElementById('hero-rotator');
       if (!el) return;
@@ -179,40 +179,43 @@ declare(strict_types=1);
       var phrases = [
         "Akses Lengkap Dunia AI.",
         "Tools Digital Terverifikasi.",
-        "Aktivasi Instan & Bergaransi."
+        "Aktivasi Cepat & Otomatis.",
+        "Garansi Akun Aman & Resmi.",
+        "Eksplorasi AI Tanpa Batas."
       ];
 
       var pIdx = 0;
-      var cIdx = phrases[0].length;
+      var cIdx = 0;
       var isDeleting = false;
-      var speed = 65;
+      var speed = 60;
 
-      el.textContent = phrases[0];
+      el.textContent = '';
 
       function step() {
         var curr = phrases[pIdx];
         if (isDeleting) {
           cIdx--;
           el.textContent = curr.substring(0, cIdx);
-          speed = 28;
+          speed = 26;
         } else {
           cIdx++;
           el.textContent = curr.substring(0, cIdx);
-          speed = 65;
+          speed = 60;
         }
 
         if (!isDeleting && cIdx === curr.length) {
           isDeleting = true;
-          speed = 2400; // Pause 2.4s so visitors can comfortably read
+          speed = 2200; // Pause 2.2s so visitors can comfortably read
         } else if (isDeleting && cIdx === 0) {
           isDeleting = false;
           pIdx = (pIdx + 1) % phrases.length;
-          speed = 350; // Brief pause before typing next phrase
+          speed = 320; // Brief pause before typing next phrase
         }
         setTimeout(step, speed);
       }
 
-      setTimeout(step, 2400);
+      // Start typing immediately from beginning (char 0)
+      setTimeout(step, 350);
     })();
 
     // ─── Web3 Spotlight ───
