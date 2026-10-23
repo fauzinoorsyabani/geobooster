@@ -78,123 +78,249 @@ try {
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&display=swap" rel="stylesheet">
   
   <style>
-    /* ─── shadcn/ui Design Tokens & Reset ─── */
+    /* ─── shadcn/ui Unified Design Tokens (Single Monochromatic/Neutral Palette) ─── */
     :root {
-      --background: #ffffff;
+      --background: #f8fafc;
       --foreground: #09090b;
       --card: #ffffff;
       --card-foreground: #09090b;
-      --popover: #ffffff;
-      --popover-foreground: #09090b;
       --primary: #0066ff;
       --primary-foreground: #ffffff;
-      --secondary: #f4f4f5;
-      --secondary-foreground: #18181b;
-      --muted: #f4f4f5;
-      --muted-foreground: #71717a;
-      --accent: #f4f4f5;
-      --accent-foreground: #18181b;
-      --destructive: #ef4444;
-      --destructive-foreground: #fafafa;
-      --border: #e4e4e7;
-      --input: #e4e4e7;
-      --ring: #0066ff;
-      --radius: 0.75rem;
+      --secondary: #f1f5f9;
+      --secondary-foreground: #0f172a;
+      --muted: #f1f5f9;
+      --muted-foreground: #64748b;
+      --border: #e2e8f0;
+      --border-subtle: #cbd5e1;
+      --radius: 0.625rem;
     }
 
-    * {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
     }
 
-    body {
-      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-      background-color: #fafafa;
+    html, body {
+      width: 100%;
+      max-width: 100vw;
+      overflow-x: hidden;
+      background-color: var(--background);
       color: var(--foreground);
+      font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
       line-height: 1.5;
       -webkit-font-smoothing: antialiased;
     }
 
-    /* ─── Minimalist shadcn Navbar ─── */
+    /* ─── Minimalist Topbar with Hamburger Menu ─── */
     .portal-nav {
-      background: #ffffff;
+      background: rgba(255, 255, 255, 0.96);
       border-bottom: 1px solid var(--border);
       position: sticky;
       top: 0;
       z-index: 50;
-      backdrop-filter: blur(8px);
-      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      width: 100%;
     }
     .portal-nav-inner {
       max-width: 1040px;
       margin: 0 auto;
-      padding: 0 24px;
-      height: 64px;
+      padding: 0 20px;
+      height: 60px;
       display: flex;
       align-items: center;
       justify-content: space-between;
+      width: 100%;
     }
     .portal-brand {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
       text-decoration: none;
+      min-width: 0;
+    }
+    .portal-brand img {
+      flex-shrink: 0;
+    }
+    .portal-brand span {
+      font-weight: 800;
+      font-size: 1.1rem;
+      color: #0066ff;
+      letter-spacing: -0.02em;
+      white-space: nowrap;
     }
     .portal-badge {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       letter-spacing: 0.05em;
       text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 9999px;
+      padding: 3px 8px;
+      border-radius: 4px;
       background: #eff6ff;
       color: #0066ff;
       border: 1px solid #bfdbfe;
+      white-space: nowrap;
     }
+
+    /* Desktop Navigation Actions */
     .portal-nav-actions {
       display: flex;
       align-items: center;
-      gap: 12px;
+      gap: 10px;
     }
     .btn-nav-outline {
       display: inline-flex;
       align-items: center;
       gap: 6px;
       padding: 7px 14px;
-      border-radius: var(--radius);
+      border-radius: 6px;
       border: 1px solid var(--border);
       background: #ffffff;
       font-size: 13px;
       font-weight: 600;
-      color: var(--foreground);
+      color: #0f172a;
       text-decoration: none;
       transition: all 0.15s ease;
+      white-space: nowrap;
     }
     .btn-nav-outline:hover {
       background: var(--muted);
-      border-color: #d4d4d8;
+      border-color: #cbd5e1;
     }
     .btn-nav-logout {
       display: inline-flex;
       align-items: center;
       padding: 7px 12px;
-      border-radius: var(--radius);
+      border-radius: 6px;
       font-size: 13px;
       font-weight: 600;
-      color: var(--destructive);
+      color: #64748b;
+      text-decoration: none;
+      transition: all 0.15s ease;
+    }
+    .btn-nav-logout:hover {
+      color: #ef4444;
+      background: #fef2f2;
+    }
+
+    /* Hamburger Toggle Button */
+    .btn-hamburger {
+      display: none;
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 7px 10px;
+      cursor: pointer;
+      color: #0f172a;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.15s ease;
+    }
+    .btn-hamburger:hover {
+      background: var(--muted);
+    }
+
+    /* Mobile Hamburger Drawer Menu */
+    .mobile-nav-backdrop {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(15, 23, 42, 0.45);
+      backdrop-filter: blur(4px);
+      z-index: 90;
+      opacity: 0;
+      transition: opacity 0.2s ease;
+    }
+    .mobile-nav-backdrop.is-open {
+      display: block;
+      opacity: 1;
+    }
+    .mobile-nav-drawer {
+      position: fixed;
+      top: 0;
+      right: -290px;
+      width: 280px;
+      height: 100%;
+      background: #ffffff;
+      border-left: 1px solid var(--border);
+      z-index: 100;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      box-shadow: -8px 0 24px rgba(0, 0, 0, 0.08);
+      transition: right 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      box-sizing: border-box;
+    }
+    .mobile-nav-drawer.is-open {
+      right: 0;
+    }
+    .mobile-nav-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 16px;
+    }
+    .mobile-nav-user-title {
+      font-weight: 700;
+      font-size: 0.95rem;
+      color: #0f172a;
+    }
+    .mobile-nav-user-sub {
+      font-size: 0.78rem;
+      color: var(--muted-foreground);
+      word-break: break-all;
+    }
+    .btn-close-drawer {
+      background: #f1f5f9;
+      border: none;
+      border-radius: 6px;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.25rem;
+      color: #475569;
+      cursor: pointer;
+    }
+    .mobile-nav-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex: 1;
+    }
+    .mobile-nav-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 11px 14px;
+      border-radius: 8px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: #0f172a;
       text-decoration: none;
       transition: background 0.15s ease;
     }
-    .btn-nav-logout:hover {
-      background: #fef2f2;
+    .mobile-nav-item:hover, .mobile-nav-item:active {
+      background: #f1f5f9;
+    }
+    .mobile-nav-item.logout {
+      color: #dc2626;
+      margin-top: auto;
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      border-radius: 0;
     }
 
     /* ─── Main Content Container ─── */
     .portal-main {
       max-width: 1040px;
-      margin: 32px auto 80px auto;
-      padding: 0 24px;
+      margin: 24px auto 60px auto;
+      padding: 0 20px;
+      width: 100%;
+      box-sizing: border-box;
     }
 
     /* ─── User Profile Card ─── */
@@ -202,374 +328,423 @@ try {
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      flex-wrap: wrap;
-      gap: 20px;
-      margin-bottom: 24px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-    }
-    .user-profile-left {
-      display: flex;
-      align-items: center;
-      gap: 16px;
-    }
-    .user-avatar-circle {
-      width: 56px;
-      height: 56px;
-      border-radius: 9999px;
-      background: #0066ff;
-      color: #ffffff;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1.3rem;
-      font-weight: 800;
-      border: 2px solid #ffffff;
-      box-shadow: 0 0 0 2px #bfdbfe;
-      object-fit: cover;
-    }
-    .user-headline h1 {
-      font-size: 1.35rem;
-      font-weight: 800;
-      letter-spacing: -0.02em;
-      color: var(--foreground);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .user-headline p {
-      font-size: 13px;
-      color: var(--muted-foreground);
-      margin-top: 2px;
-    }
-    .badge-verified {
-      display: inline-flex;
-      align-items: center;
-      gap: 4px;
-      background: #ecfdf5;
-      color: #059669;
-      border: 1px solid #a7f3d0;
-      font-size: 11px;
-      font-weight: 700;
-      padding: 2px 8px;
-      border-radius: 9999px;
-    }
-
-    /* ─── shadcn Metric Stats Grid ─── */
-    .stats-grid {
-      display: grid;
-      grid-template-columns: repeat(4, 1fr);
-      gap: 16px;
-      margin-bottom: 32px;
-    }
-    .stat-card {
-      background: #ffffff;
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 20px;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
-      transition: transform 0.15s ease, border-color 0.15s ease;
-    }
-    .stat-card:hover {
-      border-color: #cbd5e1;
-      transform: translateY(-1px);
-    }
-    .stat-card-title {
-      font-size: 12px;
-      font-weight: 600;
-      color: var(--muted-foreground);
-      text-transform: uppercase;
-      letter-spacing: 0.04em;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 8px;
-    }
-    .stat-card-number {
-      font-size: 1.75rem;
-      font-weight: 800;
-      letter-spacing: -0.03em;
-      color: var(--foreground);
-    }
-    .stat-card-sub {
-      font-size: 12px;
-      color: var(--muted-foreground);
-      margin-top: 4px;
-    }
-
-    /* ─── shadcn Tabs & Controls ─── */
-    .portal-controls {
+      padding: 20px 22px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 16px;
       margin-bottom: 20px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      width: 100%;
+      box-sizing: border-box;
+    }
+    .user-profile-left {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-width: 0;
+    }
+    .user-avatar-circle {
+      width: 48px;
+      height: 48px;
+      border-radius: 8px;
+      background: #0f172a;
+      color: #ffffff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.15rem;
+      font-weight: 800;
+      flex-shrink: 0;
+    }
+    .user-headline h1 {
+      font-size: 1.2rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: var(--foreground);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+    }
+    .user-headline p {
+      font-size: 12.5px;
+      color: var(--muted-foreground);
+      margin-top: 2px;
+      word-break: break-word;
+    }
+    /* Rectangular single-color badge (no green, not round) */
+    .badge-verified {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      background: #f1f5f9;
+      color: #0f172a;
+      border: 1px solid #cbd5e1;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 2px 7px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+
+    /* ─── Metric Stats Grid (Single Monochrome/Neutral Palette) ─── */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin-bottom: 24px;
+      width: 100%;
+    }
+    .stat-card {
+      background: #ffffff;
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
+      transition: border-color 0.15s ease;
+      min-width: 0;
+      box-sizing: border-box;
+    }
+    .stat-card:hover {
+      border-color: var(--border-subtle);
+    }
+    .stat-card-title {
+      font-size: 11.5px;
+      font-weight: 600;
+      color: var(--muted-foreground);
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 6px;
+    }
+    .stat-card-title svg {
+      color: #64748b;
+    }
+    .stat-card-number {
+      font-size: 1.55rem;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      color: #0f172a;
+      word-break: break-word;
+    }
+    .stat-card-sub {
+      font-size: 11.5px;
+      color: var(--muted-foreground);
+      margin-top: 3px;
+    }
+
+    /* ─── Tabs & Controls ─── */
+    .portal-controls {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 14px;
+      margin-bottom: 18px;
+      width: 100%;
     }
     .shadcn-tabs {
       display: inline-flex;
       align-items: center;
-      background: var(--muted);
-      padding: 4px;
-      border-radius: var(--radius);
+      background: #f1f5f9;
+      padding: 3px;
+      border-radius: 6px;
       border: 1px solid var(--border);
+      max-width: 100%;
+      overflow-x: auto;
     }
     .shadcn-tab-btn {
       background: transparent;
       border: none;
-      padding: 6px 14px;
-      font-size: 13px;
+      padding: 6px 12px;
+      font-size: 12.5px;
       font-weight: 600;
       color: var(--muted-foreground);
-      border-radius: calc(var(--radius) - 3px);
+      border-radius: 4px;
       cursor: pointer;
       transition: all 0.15s ease;
       display: flex;
       align-items: center;
       gap: 6px;
+      white-space: nowrap;
     }
     .shadcn-tab-btn.is-active {
       background: #ffffff;
-      color: var(--foreground);
+      color: #0f172a;
       box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
     }
     .shadcn-tab-count {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 700;
       padding: 1px 6px;
-      border-radius: 9999px;
-      background: var(--secondary);
-      color: var(--foreground);
+      border-radius: 4px;
+      background: #e2e8f0;
+      color: #0f172a;
     }
     .shadcn-tab-btn.is-active .shadcn-tab-count {
-      background: #eff6ff;
-      color: #0066ff;
+      background: #0f172a;
+      color: #ffffff;
     }
 
     .shadcn-search {
       position: relative;
-      min-width: 280px;
+      flex: 1;
+      max-width: 320px;
+      min-width: 220px;
     }
     .shadcn-search-input {
       width: 100%;
-      height: 38px;
-      padding: 0 14px 0 36px;
+      height: 36px;
+      padding: 0 12px 0 34px;
       background: #ffffff;
       border: 1px solid var(--border);
-      border-radius: var(--radius);
+      border-radius: 6px;
       font-size: 13px;
       font-family: inherit;
       color: var(--foreground);
       outline: none;
-      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+      transition: border-color 0.15s ease;
     }
     .shadcn-search-input:focus {
-      border-color: var(--primary);
-      box-shadow: 0 0 0 3px rgba(0, 102, 255, 0.12);
+      border-color: #0f172a;
     }
     .shadcn-search-icon {
       position: absolute;
-      left: 12px;
+      left: 11px;
       top: 50%;
       transform: translateY(-50%);
       color: var(--muted-foreground);
       pointer-events: none;
     }
 
-    /* ─── shadcn Order Card ─── */
+    /* ─── Order Cards ─── */
     .order-card-wrap {
       display: flex;
       flex-direction: column;
-      gap: 16px;
+      gap: 14px;
+      width: 100%;
     }
     .order-card {
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: var(--radius);
-      padding: 24px;
+      padding: 20px 22px;
       box-shadow: 0 1px 3px rgba(0, 0, 0, 0.02);
       transition: border-color 0.15s ease;
+      width: 100%;
+      box-sizing: border-box;
+      overflow: hidden;
     }
     .order-card:hover {
-      border-color: #cbd5e1;
+      border-color: var(--border-subtle);
     }
     .order-card-top {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      padding-bottom: 14px;
+      gap: 10px;
+      padding-bottom: 12px;
       border-bottom: 1px solid var(--border);
-      margin-bottom: 16px;
+      margin-bottom: 14px;
+      flex-wrap: wrap;
     }
     .order-meta-id {
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
+      font-size: 12px;
       font-weight: 700;
       color: var(--foreground);
       background: var(--muted);
       padding: 3px 8px;
-      border-radius: 6px;
+      border-radius: 4px;
       border: 1px solid var(--border);
+      word-break: break-all;
     }
     .order-meta-date {
-      font-size: 12px;
+      font-size: 11.5px;
       color: var(--muted-foreground);
       margin-left: 8px;
     }
 
-    /* Status Pills */
-    .status-pill {
+    /* Rectangular single-color status badge (no circle dot, no green) */
+    .status-badge {
       display: inline-flex;
       align-items: center;
       gap: 6px;
-      font-size: 12px;
+      font-size: 11.5px;
       font-weight: 700;
-      padding: 3px 10px;
-      border-radius: 9999px;
+      padding: 4px 9px;
+      border-radius: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+      white-space: nowrap;
     }
-    .status-pill.status-fulfilled, .status-pill.status-paid {
-      background: #ecfdf5;
-      color: #059669;
-      border: 1px solid #a7f3d0;
+    .status-badge.status-paid, .status-badge.status-fulfilled {
+      background: #0f172a;
+      color: #ffffff;
+      border: 1px solid #0f172a;
     }
-    .status-pill.status-awaiting, .status-pill.status-inquiry {
-      background: #fffbeb;
-      color: #d97706;
-      border: 1px solid #fde68a;
+    .status-badge.status-awaiting, .status-badge.status-inquiry {
+      background: #f1f5f9;
+      color: #475569;
+      border: 1px solid #cbd5e1;
     }
 
     .order-card-middle {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 16px;
+      gap: 14px;
       flex-wrap: wrap;
     }
     .order-product-title {
-      font-size: 1.05rem;
+      font-size: 1rem;
       font-weight: 700;
       color: var(--foreground);
       margin-bottom: 4px;
+      word-break: break-word;
     }
     .order-product-price {
-      font-size: 14px;
+      font-size: 13.5px;
       font-weight: 700;
-      color: #0066ff;
+      color: #0f172a;
       font-family: 'JetBrains Mono', monospace;
     }
     .btn-action-primary {
       display: inline-flex;
       align-items: center;
+      justify-content: center;
       gap: 8px;
       padding: 8px 16px;
       background: #0066ff;
       color: #ffffff;
-      border-radius: var(--radius);
-      font-size: 13px;
+      border-radius: 6px;
+      font-size: 12.5px;
       font-weight: 700;
       text-decoration: none;
-      transition: background 0.15s ease, transform 0.15s ease;
+      transition: background 0.15s ease;
+      white-space: nowrap;
     }
     .btn-action-primary:hover {
       background: #0052cc;
-      transform: translateY(-1px);
     }
 
-    /* ─── Credential Box Overhaul (shadcn Vault) ─── */
+    /* ─── Credential Vault (Single Monochrome/Neutral Palette, No Green) ─── */
     .credential-pool-wrap {
-      margin-top: 18px;
-      padding-top: 16px;
+      margin-top: 16px;
+      padding-top: 14px;
       border-top: 1px solid var(--border);
+      width: 100%;
     }
     .cred-card {
-      background: #fbfcfe;
-      border: 1px solid #bbf7d0;
-      border-radius: var(--radius);
-      padding: 16px 20px;
+      background: #f8fafc;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 14px 16px;
+      box-sizing: border-box;
+      width: 100%;
     }
     .cred-card.cred-pending {
-      border-color: #fde68a;
-      background: #fffdf5;
+      border-color: #cbd5e1;
+      background: #ffffff;
     }
     .cred-card-header {
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: 8px;
       font-weight: 700;
-      font-size: 13px;
-      color: #065f46;
-      padding-bottom: 10px;
-      border-bottom: 1px dashed #d1fae5;
-      margin-bottom: 12px;
+      font-size: 12.5px;
+      color: #0f172a;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      margin-bottom: 10px;
+      flex-wrap: wrap;
     }
+    /* Rectangular single-color badge (no green) */
     .cred-badge-active {
-      font-size: 11px;
+      font-size: 10.5px;
       font-weight: 800;
       text-transform: uppercase;
-      padding: 2px 8px;
-      border-radius: 9999px;
-      background: #d1fae5;
-      color: #047857;
+      padding: 2px 7px;
+      border-radius: 4px;
+      background: #e2e8f0;
+      color: #0f172a;
+      white-space: nowrap;
     }
     .cred-row {
       display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 8px;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 6px;
+      margin-bottom: 10px;
+      width: 100%;
     }
     .cred-label {
-      width: 100px;
       font-size: 11px;
       font-weight: 700;
-      color: #065f46;
+      color: #64748b;
       text-transform: uppercase;
       letter-spacing: 0.04em;
-      flex-shrink: 0;
     }
     .cred-val-wrap {
-      flex: 1;
       background: #ffffff;
       border: 1px solid var(--border);
       border-radius: 6px;
-      padding: 6px 12px;
+      padding: 7px 12px;
       font-family: 'JetBrains Mono', monospace;
-      font-size: 13px;
+      font-size: 12.5px;
       color: #09090b;
-      overflow: hidden;
-      text-overflow: ellipsis;
+      word-break: break-all;
+      overflow-wrap: anywhere;
+      box-sizing: border-box;
+      width: 100%;
+    }
+    .cred-actions-bar {
+      display: flex;
+      gap: 8px;
+      width: 100%;
+      margin-top: 2px;
     }
     .btn-cred-copy, .btn-cred-toggle {
-      background: #18181b;
+      flex: 1;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: #0f172a;
       color: #ffffff;
       border: none;
       border-radius: 6px;
-      padding: 6px 12px;
-      font-size: 12px;
-      font-weight: 600;
+      padding: 7px 12px;
+      font-size: 11.5px;
+      font-weight: 700;
       cursor: pointer;
       white-space: nowrap;
       transition: background 0.15s ease;
+      box-sizing: border-box;
     }
     .btn-cred-copy:hover {
       background: #0066ff;
     }
     .btn-cred-toggle {
-      background: #f4f4f5;
-      color: #27272a;
+      background: #f1f5f9;
+      color: #334155;
       border: 1px solid var(--border);
     }
     .btn-cred-toggle:hover {
-      background: #e4e4e7;
+      background: #e2e8f0;
     }
     .cred-notes {
-      margin-top: 10px;
+      margin-top: 8px;
       padding-top: 8px;
-      border-top: 1px solid #f1f5f9;
-      color: #065f46;
-      font-size: 12px;
+      border-top: 1px solid var(--border);
+      color: #475569;
+      font-size: 11.5px;
+      line-height: 1.4;
     }
 
     /* ─── Empty State ─── */
@@ -577,36 +752,94 @@ try {
       background: #ffffff;
       border: 1px dashed var(--border);
       border-radius: var(--radius);
-      padding: 64px 24px;
+      padding: 48px 20px;
       text-align: center;
+      box-sizing: border-box;
+      width: 100%;
     }
     .empty-icon {
-      width: 48px;
-      height: 48px;
+      width: 44px;
+      height: 44px;
       color: var(--muted-foreground);
-      margin: 0 auto 16px auto;
+      margin: 0 auto 14px auto;
     }
 
-    /* Responsive */
+    /* ─── Responsive Mobile Overrides (Strictly Paten, Zero Horizontal Scroll) ─── */
     @media (max-width: 768px) {
+      .portal-nav-actions {
+        display: none;
+      }
+      .btn-hamburger {
+        display: inline-flex;
+      }
       .stats-grid {
         grid-template-columns: 1fr 1fr;
+        gap: 10px;
       }
       .portal-controls {
         flex-direction: column;
         align-items: stretch;
       }
       .shadcn-search {
-        min-width: 100%;
-      }
-      .cred-row {
-        flex-wrap: wrap;
-      }
-      .cred-label {
-        width: 100%;
+        max-width: 100%;
       }
     }
-    @media (max-width: 500px) {
+
+    @media (max-width: 540px) {
+      .portal-nav-inner {
+        padding: 0 14px;
+      }
+      .portal-main {
+        padding: 0 12px;
+        margin-top: 16px;
+      }
+      .user-profile-header {
+        padding: 16px 14px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 14px;
+      }
+      .user-profile-left {
+        gap: 12px;
+      }
+      .user-avatar-circle {
+        width: 42px;
+        height: 42px;
+        font-size: 1rem;
+      }
+      .user-headline h1 {
+        font-size: 1.1rem;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+        gap: 8px;
+      }
+      .stat-card {
+        padding: 12px 14px;
+      }
+      .stat-card-number {
+        font-size: 1.35rem;
+      }
+      .order-card {
+        padding: 16px 14px;
+        border-radius: 12px;
+      }
+      .order-card-middle {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+      }
+      .order-card-middle > div:last-child {
+        width: 100%;
+      }
+      .btn-action-primary, .order-card-middle .btn-nav-outline {
+        width: 100%;
+        text-align: center;
+        justify-content: center;
+      }
+    }
+
+    @media (max-width: 380px) {
       .stats-grid {
         grid-template-columns: 1fr;
       }
@@ -615,29 +848,62 @@ try {
 </head>
 <body>
 
-  <!-- Minimalist Topbar -->
+  <!-- Minimalist Topbar with Hamburger Toggle -->
   <header class="portal-nav">
     <div class="portal-nav-inner">
       <a href="/" class="portal-brand">
         <img src="/assets/logos/ziulabs-icon.webp" alt="ZiuLabs" width="30" height="30">
-        <span style="font-weight: 800; font-size: 1.15rem; color: #0066ff; letter-spacing: -0.02em;">ZiuLabs</span>
+        <span>ZiuLabs</span>
         <span class="portal-badge">Customer Portal</span>
       </a>
 
+      <!-- Desktop Nav Actions -->
       <div class="portal-nav-actions">
         <a href="/" class="btn-nav-outline">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>
           <span>Katalog Toko</span>
         </a>
-        <a href="https://wa.me/62895609250509" target="_blank" rel="noopener" class="btn-nav-outline" style="color: #059669;">
+        <a href="https://wa.me/62895609250509" target="_blank" rel="noopener" class="btn-nav-outline">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
           <span>Bantuan CS</span>
         </a>
         <a href="/auth/logout.php" class="btn-nav-logout" title="Keluar dari akun">
           Keluar
         </a>
       </div>
+
+      <!-- Hamburger Menu Button -->
+      <button type="button" class="btn-hamburger" id="btn-hamburger" aria-label="Buka Menu Navigasi">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+      </button>
     </div>
   </header>
+
+  <!-- Mobile Hamburger Drawer & Backdrop -->
+  <div class="mobile-nav-backdrop" id="mobile-nav-backdrop"></div>
+  <aside class="mobile-nav-drawer" id="mobile-nav-drawer" aria-label="Menu Mobile">
+    <div class="mobile-nav-head">
+      <div>
+        <div class="mobile-nav-user-title"><?= htmlspecialchars($userName) ?></div>
+        <div class="mobile-nav-user-sub"><?= htmlspecialchars($userEmail ?: 'Pelanggan') ?></div>
+      </div>
+      <button type="button" class="btn-close-drawer" id="btn-close-drawer" aria-label="Tutup Menu">&times;</button>
+    </div>
+    <nav class="mobile-nav-list">
+      <a href="/" class="mobile-nav-item">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m15 18-6-6 6-6"/></svg>
+        <span>Katalog Toko</span>
+      </a>
+      <a href="https://wa.me/62895609250509" target="_blank" rel="noopener" class="mobile-nav-item">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+        <span>Bantuan CS WhatsApp</span>
+      </a>
+      <a href="/auth/logout.php" class="mobile-nav-item logout">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+        <span>Keluar dari Akun</span>
+      </a>
+    </nav>
+  </aside>
 
   <main class="portal-main">
     <!-- User Profile Header -->
@@ -668,7 +934,7 @@ try {
       </div>
     </section>
 
-    <!-- shadcn Metric Stats Grid -->
+    <!-- Metric Stats Grid (Single Clean Palette) -->
     <section class="stats-grid">
       <div class="stat-card">
         <div class="stat-card-title">
@@ -682,16 +948,16 @@ try {
       <div class="stat-card">
         <div class="stat-card-title">
           <span>Produk Aktif</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #059669;"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="m7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/><path d="m7 11V7a5 5 0 0 1 10 0v4"/></svg>
         </div>
-        <div class="stat-card-number" style="color: #059669;"><?= $totalPaid ?></div>
+        <div class="stat-card-number"><?= $totalPaid ?></div>
         <div class="stat-card-sub">Kredensial &amp; lisensi siap pakai</div>
       </div>
 
       <div class="stat-card">
         <div class="stat-card-title">
           <span>Garansi Toko</span>
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: #0066ff;"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
         </div>
         <div class="stat-card-number" style="font-size: 1.4rem;">30 Hari</div>
         <div class="stat-card-sub">Penggantian akun &amp; full support</div>
@@ -709,7 +975,7 @@ try {
       </div>
     </section>
 
-    <!-- Controls: shadcn Tabs + Live Search -->
+    <!-- Controls: Tabs + Live Search -->
     <div class="portal-controls">
       <div class="shadcn-tabs">
         <button type="button" class="shadcn-tab-btn is-active" data-filter="all">
@@ -750,13 +1016,12 @@ try {
         ?>
           <div class="order-card js-order-card" data-category="<?= $filterCategory ?>" data-search="<?= htmlspecialchars($searchData) ?>">
             <div class="order-card-top">
-              <div style="display: flex; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 8px; flex-wrap: wrap;">
                 <span class="order-meta-id"><?= htmlspecialchars($ord['public_id']) ?></span>
                 <span class="order-meta-date"><?= htmlspecialchars($ord['created_at']) ?></span>
               </div>
               <div>
-                <span class="status-pill status-<?= htmlspecialchars($ord['status']) ?>">
-                  <span style="width: 6px; height: 6px; border-radius: 50%; background: currentColor;"></span>
+                <span class="status-badge status-<?= htmlspecialchars($ord['status']) ?>">
                   <?= $isOrderPaid ? 'Lunas &amp; Aktif' : 'Menunggu Bayar' ?>
                 </span>
               </div>
@@ -772,8 +1037,7 @@ try {
 
               <div>
                 <?php if ($isOrderPaid): ?>
-                  <a href="/order/payment.php?id=<?= urlencode($ord['public_id']) ?>" class="btn-nav-outline" style="border-color: #a7f3d0; color: #047857; background: #ecfdf5;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10"/></svg>
+                  <a href="/order/payment.php?id=<?= urlencode($ord['public_id']) ?>" class="btn-nav-outline">
                     <span>Detail Lisensi &rarr;</span>
                   </a>
                 <?php else: ?>
@@ -794,9 +1058,35 @@ try {
     </div>
   </main>
 
-  <!-- Interactive Search and Tab Filter JS -->
+  <!-- Interactive Search, Tab Filter & Hamburger Drawer JS -->
   <script>
   (function() {
+    // Hamburger Drawer Logic
+    var hamburgerBtn = document.getElementById('btn-hamburger');
+    var closeDrawerBtn = document.getElementById('btn-close-drawer');
+    var drawer = document.getElementById('mobile-nav-drawer');
+    var backdrop = document.getElementById('mobile-nav-backdrop');
+
+    function openDrawer() {
+      if (drawer && backdrop) {
+        drawer.classList.add('is-open');
+        backdrop.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+      }
+    }
+    function closeDrawer() {
+      if (drawer && backdrop) {
+        drawer.classList.remove('is-open');
+        backdrop.classList.remove('is-open');
+        document.body.style.overflow = '';
+      }
+    }
+
+    if (hamburgerBtn) hamburgerBtn.addEventListener('click', openDrawer);
+    if (closeDrawerBtn) closeDrawerBtn.addEventListener('click', closeDrawer);
+    if (backdrop) backdrop.addEventListener('click', closeDrawer);
+
+    // Filter & Search Logic
     var tabBtns = document.querySelectorAll('.shadcn-tab-btn');
     var searchInput = document.getElementById('order-search-input');
     var orderCards = Array.from(document.querySelectorAll('.js-order-card'));
