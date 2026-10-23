@@ -242,25 +242,19 @@ declare(strict_types=1);
       var customAudio = null;
       var hasCustomAudio = false;
 
-      // Preload custom audio if placed in /assets/audio/mascot-voice.mp3
+      // Preload custom audio from /assets/audio/mascot-voice.mp3
       try {
         customAudio = new Audio('/assets/audio/mascot-voice.mp3');
         customAudio.preload = 'auto';
-        customAudio.addEventListener('canplaythrough', function() {
-          hasCustomAudio = true;
-        });
-        customAudio.addEventListener('error', function() {
-          hasCustomAudio = false;
-        });
       } catch (e) {
-        hasCustomAudio = false;
+        customAudio = null;
       }
 
       function speakMascot() {
         mascot.classList.add('is-speaking');
 
         // Priority 1: Play custom audio file if available
-        if (hasCustomAudio && customAudio) {
+        if (customAudio) {
           try {
             customAudio.currentTime = 0;
             var playPromise = customAudio.play();
